@@ -43,6 +43,8 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -51,6 +53,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\Category.cs" />
+    <Compile Include="Entities\Coupon.cs" />
+    <Compile Include="Entities\Customer.cs" />
+    <Compile Include="Entities\Employee.cs" />
+    <Compile Include="Entities\Job.cs" />
+    <Compile Include="Entities\JobDetail.cs" />
+    <Compile Include="Entities\JobDetailPart.cs" />
+    <Compile Include="Entities\OnlineCustomer.cs" />
+    <Compile Include="Entities\Part.cs" />
+    <Compile Include="Entities\Position.cs" />
+    <Compile Include="Entities\PurchaseOrder.cs" />
+    <Compile Include="Entities\PurchaseOrderDetail.cs" />
+    <Compile Include="Entities\ReceiveOrder.cs" />
+    <Compile Include="Entities\ReceiveOrderDetail.cs" />
+    <Compile Include="Entities\ReturnedOrderDetail.cs" />
+    <Compile Include="Entities\Sale.cs" />
+    <Compile Include="Entities\SaleDetail.cs" />
+    <Compile Include="Entities\SaleRefund.cs" />
+    <Compile Include="Entities\SaleRefundDetail.cs" />
+    <Compile Include="Entities\ShoppingCart.cs" />
+    <Compile Include="Entities\ShoppingCartItem.cs" />
+    <Compile Include="Entities\StandardJob.cs" />
+    <Compile Include="Entities\StandardJobPart.cs" />
+    <Compile Include="Entities\UnorderedPurchaseItemCart.cs" />
+    <Compile Include="Entities\Vendor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -59,7 +86,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DTOs\" />
-    <Folder Include="Entities\" />
     <Folder Include="POCOs\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
