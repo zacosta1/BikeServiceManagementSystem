@@ -4,6 +4,11 @@ using System;
 using System.Web;
 using BSMSWebsite;
 
+#region AdditionalNamespaces
+using BSMSSystem.BLL.Security;
+using BSMSData.Entities.Security;
+#endregion
+
 public partial class Account_RegisterExternalLogin : System.Web.UI.Page
 {
     protected string ProviderName
