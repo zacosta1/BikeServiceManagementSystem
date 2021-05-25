@@ -24,6 +24,12 @@ namespace BSMSData.Entities
         [StringLength(30)]
         public string FirstName { get; set; }
 
+        [NotMapped]
+        public string Name
+        {
+            get { return string.Format("{0}, {1}", LastName, FirstName); }
+        }
+
         [StringLength(40)]
         public string Address { get; set; }
 

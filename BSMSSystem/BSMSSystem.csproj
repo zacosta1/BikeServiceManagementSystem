@@ -57,9 +57,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BLL\CustomerController.cs" />
     <Compile Include="BLL\EmployeeController.cs" />
     <Compile Include="BLL\Security\RoleManager.cs" />
     <Compile Include="BLL\Security\UserManager.cs" />
+    <Compile Include="BLL\ServiceController.cs" />
     <Compile Include="DAL\BSMSContext.cs" />
     <Compile Include="DAL\Security\ApplicationDbContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

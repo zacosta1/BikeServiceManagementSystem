@@ -56,6 +56,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DTOs\ServiceDetailDTO.cs" />
+    <Compile Include="DTOs\ServiceDTO.cs" />
     <Compile Include="Entities\Category.cs" />
     <Compile Include="Entities\Coupon.cs" />
     <Compile Include="Entities\Customer.cs" />
@@ -87,15 +89,16 @@
     <Compile Include="Entities\Vendor.cs" />
     <Compile Include="POCOs\EmployeeListPOCO.cs" />
     <Compile Include="POCOs\RegisteredEmployeePOCO.cs" />
+    <Compile Include="POCOs\ServiceDetailPartPOCO.cs" />
+    <Compile Include="POCOs\ServiceDetailPOCO.cs" />
+    <Compile Include="POCOs\ServicePOCO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DTOs\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
