@@ -186,40 +186,8 @@ public partial class Servicing : System.Web.UI.Page
         ServiceDetailsListView.DataSource = serviceDetailList;
         ServiceDetailsListView.DataBind();
 
-        //CheckStatusForButtonVisibility();
-
         //scroll page to bottom
         //ClientScript.RegisterClientScriptBlock(this.GetType(), "", "window.onload=function(){window.scrollTo(0,document.body.scrollHeight)};", true);
-    }
-
-    protected void CheckStatusForButtonVisibility()
-    {
-        foreach (var item in ServiceDetailsListView.Items)
-        {
-            switch ((item.FindControl("StatusLabel") as Label).Text.Trim().ToLower())
-            {
-                case null:
-                    (item.FindControl("StartServiceButton") as LinkButton).Visible = true;
-                    (item.FindControl("FinishServiceButton") as LinkButton).Visible = false;
-                    (item.FindControl("RemoveServiceDetailButton") as LinkButton).Visible = true;
-                    break;
-                case "started":
-                    (item.FindControl("StartServiceButton") as LinkButton).Visible = false;
-                    (item.FindControl("FinishServiceButton") as LinkButton).Visible = true;
-                    (item.FindControl("RemoveServiceDetailButton") as LinkButton).Visible = false;
-                    break;
-                case "done":
-                    (item.FindControl("StartServiceButton") as LinkButton).Visible = false;
-                    (item.FindControl("FinishServiceButton") as LinkButton).Visible = false;
-                    (item.FindControl("RemoveServiceDetailButton") as LinkButton).Visible = false;
-                    break;
-                default:
-                    (item.FindControl("StartServiceButton") as LinkButton).Visible = true;
-                    (item.FindControl("FinishServiceButton") as LinkButton).Visible = false;
-                    (item.FindControl("RemoveServiceDetailButton") as LinkButton).Visible = true;
-                    break;
-            }
-        }
     }
 
     protected void DeselectServiceButton_Click(object sender, EventArgs e)
@@ -307,7 +275,7 @@ public partial class Servicing : System.Web.UI.Page
     {
         int i = e.Item.DisplayIndex;
 
-        if ((e.CommandName.Equals("Edit")) ||(e.CommandName.Equals("Select")))
+        if ((e.CommandName.Equals("Edit")) || (e.CommandName.Equals("Select")))
         {
             ServiceDetailsListView.InsertItemPosition = (InsertItemPosition)0;
             ServiceDetailsPanel.Visible = true;
@@ -316,6 +284,59 @@ public partial class Servicing : System.Web.UI.Page
         {
             ServiceDetailsListView.InsertItemPosition = (InsertItemPosition)2;
             ServiceDetailsPanel.Visible = true;
+        }
+        else if (e.CommandName.Equals("UpdateStatus"))
+        {
+            ServiceDetailsListView.InsertItemPosition = (InsertItemPosition)2;
+            ServiceDetailsPanel.Visible = true;
+
+            //fetch data from service detail item
+            ListViewItem serviceDetailRow = ServiceDetailsListView.Items[i];
+            int serviceId = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
+            int serviceDetailId = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+            string description = (serviceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
+            string status = (serviceDetailRow.FindControl("StatusLabel") as Label).Text.Trim();
+
+            //fetch selected service row index for re-selection after data bind
+            int serviceRowIndex = ServicesListView.SelectedIndex;
+
+            //initialize variables needed
+            bool? newStatus = null;
+            string customSuccessMessage = "";
+
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                //set status to Started
+                newStatus = false;
+                customSuccessMessage = description + " for service #" + serviceId + " has started.";
+            }
+            else if (status == "Started")
+            {
+                //set status to Done
+                newStatus = true;
+                customSuccessMessage = description + " for service #" + serviceId + " has finished.";
+            }
+
+            MessageUserControl.Visible = true;
+            MessageUserControl.TryRun(() =>
+            {
+                ServiceController sysmgr = new ServiceController();
+
+                //update service detail status and appropriate service dates
+                sysmgr.Update_ServiceDetailStatus(serviceId, serviceDetailId, newStatus);
+
+                //refresh current services list
+                ServicesODS.DataBind();
+                ServicesListView.DataBind();
+                ServicesListView.SelectedIndex = serviceRowIndex;
+
+                //refresh current service detail list
+                List<ServiceDetailPOCO> detailResults = sysmgr.List_ServiceDetailsByServiceID(serviceId);
+
+                ServiceDetailsListView.DataSource = detailResults;
+                ServiceDetailsListView.DataBind();
+
+            }, "Status Updated", customSuccessMessage);
         }
         else if (e.CommandName.Equals("Update"))
         {
@@ -326,17 +347,18 @@ public partial class Servicing : System.Web.UI.Page
 
             int serviceId = int.Parse((editRow.FindControl("ServiceIDLabel") as Label).Text);
             string existingComments = (editRow.FindControl("ServiceDetailCommentsLabel") as Label).Text.Trim();
-            HtmlTextArea commentsTextArea = editRow.FindControl("ServiceDetailCommentsTextArea") as HtmlTextArea;
+            string inputComments = (editRow.FindControl("ServiceDetailCommentsTextArea") as HtmlTextArea).InnerText.Trim();
 
             string additionalComments = null;
-            //check if there's no exisiting comment
+
+            //add a semi-colon as a separator between comments if there's an existing comment
             if (string.IsNullOrWhiteSpace(existingComments))
             {
-                additionalComments += commentsTextArea.InnerText.Trim();
+                additionalComments += inputComments;
             }
             else
             {
-                additionalComments = "; " + commentsTextArea.InnerText.Trim();
+                additionalComments = "; " + inputComments;
             }
 
             MessageUserControl.Visible = true;
@@ -358,7 +380,7 @@ public partial class Servicing : System.Web.UI.Page
                 ServiceDetailsListView.DataSource = detailResults;
                 ServiceDetailsListView.EditIndex = -1;
                 ServiceDetailsListView.DataBind();
-            }, "Comments Successfully Added", "Additional comments have been added to the currently selected job service.");
+            }, "Success", "Additional comments have been added to the currently selected service detail.");
         }
         else if (e.CommandName.Equals("Delete"))
         {
@@ -578,6 +600,35 @@ public partial class Servicing : System.Web.UI.Page
                 e.Item.Visible = false;
             }
         }
+        //if no item is being edited or selected...
+        else
+        {
+            string currentServiceDetailStatus = (e.Item.FindControl("StatusLabel") as Label).Text.Trim().ToLower();
+            Button serviceStatusUpdateButton = e.Item.FindControl("ServiceStatusButton") as Button;
+            Button removeServiceButton = e.Item.FindControl("RemoveServiceDetailButton") as Button;
+
+            //modify StatusUpdate button text depending on each service detail's current status
+            switch (currentServiceDetailStatus)
+            {
+                case null:
+                    serviceStatusUpdateButton.Text = "Start";
+                    break;
+                case "started":
+                    serviceStatusUpdateButton.Text = "Finish";
+                    serviceStatusUpdateButton.ToolTip = "Finish Service Detail";
+                    removeServiceButton.Visible = false;
+                    break;
+                case "done":
+                    serviceStatusUpdateButton.Visible = false;
+                    removeServiceButton.Visible = false;
+                    break;
+                default:
+                    serviceStatusUpdateButton.Text = "Start";
+                    break;
+            }
+        }
+
+
     }
 
     protected void ServiceDetailsListView_ItemUpdating(object sender, ListViewUpdateEventArgs e)

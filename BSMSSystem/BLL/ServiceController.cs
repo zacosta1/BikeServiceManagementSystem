@@ -258,12 +258,47 @@ namespace BSMSSystem.BLL
         }
 
         [DataObjectMethod(DataObjectMethodType.Update, false)]
-        public int Update_ServiceDetailStatus(ServiceDetailPOCO item)
+        public void Update_ServiceDetailStatus(int serviceId, int serviceDetailId, bool? newStatus)
         {
             using (var context = new BSMSContext())
             {
-                context.Entry(item).State = System.Data.Entity.EntityState.Modified;
-                return context.SaveChanges();
+                var service = (from x in context.Jobs
+                               where x.JobID == serviceId
+                               select x).FirstOrDefault();
+                var serviceDetail = (from x in context.JobDetails
+                               where x.JobID == serviceId && x.JobDetailID == serviceDetailId
+                               select x).FirstOrDefault();
+                int startedServiceDetailCount = (from x in context.JobDetails
+                                             where x.JobID == serviceId && x.Completed == false
+                                             select x).Count();
+                int serviceDetailCount = (from x in context.JobDetails
+                                                 where x.JobID == serviceId
+                                                 select x).Count();
+                int finishedServiceDetailCount = (from x in context.JobDetails
+                                                 where x.JobID == serviceId && x.Completed == true
+                                                 select x).Count();
+
+                //TO-DO: update quantity of parts used
+
+                //check if service is starting its first service detail
+                if (newStatus == false && startedServiceDetailCount == 0)
+                {
+                    //update service start date
+                    service.JobDateStarted = DateTime.Now;
+                }
+                //else if the service is finishing all service details, including the service detail being updated
+                else if (newStatus == true && serviceDetailCount == finishedServiceDetailCount + 1)
+                {
+                    service.JobDateDone = DateTime.Now;
+                }
+
+                //update service detail status
+                serviceDetail.Completed = newStatus;
+
+                //save changes to the database
+                context.Entry(serviceDetail).State = System.Data.Entity.EntityState.Modified;
+                context.Entry(service).State = System.Data.Entity.EntityState.Modified;
+                context.SaveChanges();
             }
         }
     }

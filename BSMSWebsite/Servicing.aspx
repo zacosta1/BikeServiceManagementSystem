@@ -71,18 +71,21 @@
                                     <div class="card h-100">
                                         <div class="card-body">
                                             <h4 class="card-title">Add Service Detail</h4>
-                                            <p class="card-subtitle mb-2 text-muted">Add a service detail.</p>
+                                            <p class="card-subtitle mb-2 text-muted">Add the first service detail.</p>
 
-                                            <div class="form-group">
-                                                <asp:Label Text="Description" runat="server" AssociatedControlID="NewServiceModalServiceDetailDescriptionTextBox"/>
-                                                <asp:TextBox runat="server" ID="NewServiceModalServiceDetailDescriptionTextBox" CssClass="form-control"/>
+                                            <div class="form-row">
+                                                <div class="form-group col-12">
+                                                    <asp:Label Text="Description" runat="server" AssociatedControlID="NewServiceModalServiceDetailDescriptionTextBox"/>
+                                                    <asp:TextBox runat="server" ID="NewServiceModalServiceDetailDescriptionTextBox" CssClass="form-control"/>
+                                                </div>
                                             </div>
-                                            <div class="form-group row">
-                                                <div class="col-md-5">
+
+                                            <div class="form-row">
+                                                <div class="form-group col-5">
                                                     <asp:Label Text="Hours" runat="server" AssociatedControlID="NewServiceModalServiceDetailHoursTextBox"/>
                                                     <asp:TextBox runat="server" ID="NewServiceModalServiceDetailHoursTextBox" CssClass="form-control"/>
                                                 </div>
-                                                <div class="col-md-7">
+                                                <div class="form-group col-7">
                                                     <asp:Label Text="Coupon" runat="server" AssociatedControlID="NewServiceModalCouponDropDownList"/>
                                                     <asp:ObjectDataSource runat="server" ID="CouponODS"
                                                         OldValuesParameterFormatString="original_{0}"
@@ -97,9 +100,12 @@
                                                     </asp:DropDownList>
                                                 </div>
                                             </div>
-                                            <div class="form-group">
-                                                <asp:Label Text="Comments" runat="server" AssociatedControlID="NewServiceModalServiceDetailCommentsTextBox"/>
-                                                <textarea  id="NewServiceModalServiceDetailCommentsTextBox" runat="server" rows="2" class="form-control" style="min-height:4rem;"/>
+                                            
+                                            <div class="form-row">
+                                                <div class="form-group col-12 mb-0">
+                                                    <asp:Label Text="Comments" runat="server" AssociatedControlID="NewServiceModalServiceDetailCommentsTextBox"/>
+                                                    <textarea  id="NewServiceModalServiceDetailCommentsTextBox" runat="server" rows="2" class="form-control" style="min-height:4rem;"/>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -218,7 +224,7 @@
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h3 class="card-title h4">Service #<asp:Label ID="SelectedServiceIDLabel" runat="server"/> Details</h3>
-                                <p class="card-subtitle text-muted">Manage a service detail of <asp:Label ID="SelectedServiceCustomerNameLabel" runat="server" CssClass="font-weight-bold"/>'s vehicle, <asp:Label ID="SelectedServiceVehicleIdentificationLabel" runat="server" CssClass="font-weight-bold"/>, to manage.</p>
+                                <p class="card-subtitle text-muted">Manage a service detail of <asp:Label ID="SelectedServiceCustomerNameLabel" runat="server" CssClass="font-weight-bold"/>'s vehicle, <asp:Label ID="SelectedServiceVehicleIdentificationLabel" runat="server" CssClass="font-weight-bold"/>.</p>
                             </div>
                         </div>                        
 
@@ -242,7 +248,7 @@
                                                 <thead>
                                                     <tr runat="server" class="thead-dark text-center align-middle">
                                                         <th runat="server" scope="col">Description</th>
-                                                        <th runat="server" scope="col">Hours</th>
+                                                        <th runat="server" scope="col">Hour(s)</th>
                                                         <th runat="server" scope="col">Coupon</th>
                                                         <th runat="server" scope="col">Comments</th>
                                                         <th runat="server" scope="col">Status</th>
@@ -293,8 +299,8 @@
                                                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="serviceDetailsActionMenuButton">
                                                         <asp:Button runat="server" ID="ManagePartsButton" CommandName="Select"
                                                             CssClass="dropdown-item"
-                                                            Text="Select" ToolTip="Select Service Detail" type="button"/>
-                                                        <asp:Button runat="server" ID="ServiceStatusButton" CommandName="StatusUp"
+                                                            Text="Manage Parts" ToolTip="Manage Service Detail Parts" type="button"/>
+                                                        <asp:Button runat="server" ID="ServiceStatusButton" CommandName="UpdateStatus"
                                                             Text="Start" CssClass="dropdown-item" ToolTip="Start Service Detail" type="button"/>
                                                         <asp:Button runat="server" ID="RemoveServiceDetailButton" CommandName="Delete"
                                                             CssClass="dropdown-item"
@@ -354,13 +360,13 @@
                                         </tr>
                                     </EditItemTemplate>
                                     <InsertItemTemplate>
-                                        <tr class="table-success text-center">
+                                        <tr class="thead-dark text-center">
                                             <td class="align-middle">
                                                 <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" Visible="false"/>
                                                 <asp:Label Text='<%# Bind("ServiceID") %>' runat="server" ID="ServiceIDLabel" Visible="false"/>
-                                                <asp:TextBox Text='<%# Bind("Description") %>' runat="server" ID="InsertRowServiceDetailDescriptionTextBox" CssClass="form-control"/></td>
+                                                <asp:TextBox Text='<%# Bind("Description") %>' runat="server" ID="InsertRowServiceDetailDescriptionTextBox" CssClass="form-control" placeholder="Description"/></td>
                                             <td class="align-middle">
-                                                <asp:TextBox Text='<%# Bind("ServiceDetailHours") %>' runat="server" ID="InsertRowServiceDetailHoursTextBox" CssClass="form-control"/></td>
+                                                <asp:TextBox Text='<%# Bind("ServiceDetailHours") %>' runat="server" ID="InsertRowServiceDetailHoursTextBox" CssClass="form-control" placeholder="Hour(s)"/></td>
                                             <td class="align-middle">
                                                 <asp:DropDownList runat="server" CssClass="custom-select" ID="InsertRowServiceDetailCouponDropDownList"
                                                     DataSourceID="CouponODS"
@@ -371,17 +377,17 @@
                                                 </asp:DropDownList></td>
                                             <td class="align-middle">
                                                 <%--<asp:TextBox Text='<%# Bind("Comments") %>' runat="server" ID="InsertRowServiceDetailCommentsTextBox" CssClass="form-control text-wrap" style="max-width:16rem;"/>--%>
-                                                <textarea runat="server" ID="ServiceDetailCommentsTextArea" class="form-control" style="min-height:2.5rem;" rows="1"/>
+                                                <textarea runat="server" ID="ServiceDetailCommentsTextArea" class="form-control" style="min-height:2.5rem;" rows="1" placeholder="Comments"/>
                                             </td>
-                                            <td class="align-middle">
-                                                <asp:Label Text='<%# Bind("Status") %>' runat="server" ID="StatusLabel" /></td>
-                                            <td class="align-middle">
+                                            <td class="align-middle" colspan="2">
+                                                <asp:Label Text='<%# Bind("Status") %>' runat="server" ID="StatusLabel" Visible="false" />
                                                 <asp:LinkButton ID="ServiceDetailListViewAddServiceDetailButton" runat="server" CommandName="Insert" Text="Add Service Detail" CssClass="btn btn-link text-decoration-none text-success p-0" ToolTip="Add Service Detail" OnClick="ServiceDetailListViewAddServiceDetailButton_Click">
                                                     <i class="bi bi-plus-circle-fill h4"></i>
                                                 </asp:LinkButton>
                                                 <asp:LinkButton ID="ServiceDetailListViewClearServiceDetailButton" runat="server" CommandName="Cancel" Text="Clear" CssClass="btn btn-link text-decoration-none text-secondary p-0" ToolTip="Clear">
                                                     <i class="bi bi-x-circle-fill h4"></i>
-                                                </asp:LinkButton></td>
+                                                </asp:LinkButton>
+                                            </td>
                                         </tr>
                                     </InsertItemTemplate>
                                 </asp:ListView>
