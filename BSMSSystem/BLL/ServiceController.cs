@@ -266,7 +266,7 @@ namespace BSMSSystem.BLL
                 }
                 else
                 {
-                    mergedComments = "; " + inputComments;
+                    mergedComments = existingComments + "; " + inputComments;
                 }
 
                 //apply update to service detail comments

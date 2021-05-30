@@ -121,7 +121,7 @@
             <div class="col-12">
                 <asp:ObjectDataSource ID="ServicesODS" runat="server"
                 OldValuesParameterFormatString="original_{0}"
-                SelectMethod="List_CurrentServices"
+                SelectMethod="List_Services"
                 TypeName="BSMSSystem.BLL.ServiceController" />
 
                 <asp:ListView ID="ServicesListView" runat="server"
