@@ -7,11 +7,6 @@
         <div class="container text-center">
             <h1 class="display-4 mt-5">Servicing</h1>
             <p class="lead">Bike In-Store Servicing Management</p>
-
-            <%--<div>
-                <asp:Button ID="ManageCurrentServicesButton" Text="Manage Current Services" runat="server" CssClass="btn btn-primary" OnClick="ManageCurrentServicesButton_Click"/>
-                <asp:Button ID="CreateNewServiceButton" Text="Add New Service" runat="server" CssClass="btn btn-success" OnClick="CreateNewServiceButton_Click"/>
-            </div>--%>
         </div>
     </div>
 
@@ -216,10 +211,10 @@
                 </asp:ListView>
             </div>
         </div>
-
-        <div class="row">
+        
+        <asp:Panel runat="server" ID="ServiceDetailsPanel" CssClass="row">
             <div class="container-fluid pb-3">
-                <asp:Panel runat="server" ID="ServiceDetailsPanel" CssClass="card">
+                <div class="card">
                     <div class="card-body">
                         <div class="row mb-4">
                             <div class="col-12">
@@ -285,9 +280,9 @@
                                                 <asp:Label Text='<%# Eval("Coupon") %>' runat="server" ID="CouponLabel" /></td>
                                             <td class="align-middle">
                                                 <asp:LinkButton runat="server" ID="EditServiceDetailButton" CommandName="Edit" 
-                                                            CssClass="btn btn-link btn-block text-decoration-none d-flex justify-content-between align-content-center" ToolTip="Add Comment">
-                                                    <asp:Label Text='<%# Eval("Comments") %>' runat="server" ID="CommentsLabel" />
-                                                    <i class="bi bi-pencil-fill"></i>
+                                                            CssClass="btn btn-link btn-block text-decoration-none" ToolTip="Add Comment" style="min-height:2.5rem;">
+                                                    <asp:Label Text='<%# Eval("Comments") %>' runat="server" ID="CommentsLabel"/>
+                                                    <span class="float-right"><i class="bi bi-pencil-fill"></i></span>
                                                 </asp:LinkButton></td>
                                             <td class="align-middle">
                                                 <asp:Label Text='<%# Eval("Status") %>' runat="server" ID="StatusLabel" /></td>
@@ -360,7 +355,7 @@
                                         </tr>
                                     </EditItemTemplate>
                                     <InsertItemTemplate>
-                                        <tr class="thead-dark text-center">
+                                        <tr class="table-active bg-transparent text-center">
                                             <td class="align-middle">
                                                 <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" Visible="false"/>
                                                 <asp:Label Text='<%# Bind("ServiceID") %>' runat="server" ID="ServiceIDLabel" Visible="false"/>
@@ -376,16 +371,15 @@
                                                     <asp:ListItem Value="0" Selected="True">Select...</asp:ListItem>
                                                 </asp:DropDownList></td>
                                             <td class="align-middle">
-                                                <%--<asp:TextBox Text='<%# Bind("Comments") %>' runat="server" ID="InsertRowServiceDetailCommentsTextBox" CssClass="form-control text-wrap" style="max-width:16rem;"/>--%>
                                                 <textarea runat="server" ID="ServiceDetailCommentsTextArea" class="form-control" style="min-height:2.5rem;" rows="1" placeholder="Comments"/>
                                             </td>
                                             <td class="align-middle" colspan="2">
                                                 <asp:Label Text='<%# Bind("Status") %>' runat="server" ID="StatusLabel" Visible="false" />
-                                                <asp:LinkButton ID="ServiceDetailListViewAddServiceDetailButton" runat="server" CommandName="Insert" Text="Add Service Detail" CssClass="btn btn-link text-decoration-none text-success p-0" ToolTip="Add Service Detail" OnClick="ServiceDetailListViewAddServiceDetailButton_Click">
+                                                <asp:LinkButton ID="ServiceDetailListViewAddServiceDetailButton" runat="server" CommandName="Insert" Text="Add Service Detail" CssClass="btn btn-link text-decoration-none text-success p-0" ToolTip="Add Service Detail">
                                                     <i class="bi bi-plus-circle-fill h4"></i>
                                                 </asp:LinkButton>
                                                 <asp:LinkButton ID="ServiceDetailListViewClearServiceDetailButton" runat="server" CommandName="Cancel" Text="Clear" CssClass="btn btn-link text-decoration-none text-secondary p-0" ToolTip="Clear">
-                                                    <i class="bi bi-x-circle-fill h4"></i>
+                                                    <i class="bi bi-backspace-fill h4"></i>
                                                 </asp:LinkButton>
                                             </td>
                                         </tr>
@@ -393,36 +387,35 @@
                                 </asp:ListView>
                             </div>
                         </div>
-
-                        <div class="row">
+                        
+                        <asp:Panel runat="server" ID="ServiceDetailPartsPanel" CssClass="row">
                             <div class="container-fluid pb-3">
-                                <asp:Panel runat="server" ID="ServiceDetailPartsPanel" CssClass="card">
+                                <div class="card">
                                     <div class="card-body">
-                                        <div class="row mb-4">
+                                        <div class="row">
                                             <div class="col-12">
-                                                <h4 class="card-title"><asp:Label ID="SelectedServiceDetailDescriptionLabel" runat="server"/> Service Detail Parts</h4>
-                                                <p class="card-subtitle mb-2 text-muted">Add, remove, update, or view service detail parts.</p>
+                                                <h4 class="card-title"><asp:Label ID="SelectedServiceDetailDescriptionLabel" runat="server"/> Parts</h4>
+                                                <p class="card-subtitle mb-2 text-muted">Manage parts in inventory necessary for <asp:Label runat="server" ID="SelectedServiceDetailDescriptionLabel2" CssClass="font-weight-bold"/> service detail.</p>
                                     
                                                 <asp:ListView runat="server" ID="ServiceDetailPartsListView"
                                                     DataKeyNames="ServiceDetailID"
                                                     InsertItemPosition="LastItem"
-                                                    OnItemCommand="ServiceDetailPartsListView_ItemCommand"
-                                                    OnItemEditing="ServiceDetailPartsListView_ItemEditing"
                                                     OnItemInserting="ServiceDetailPartsListView_ItemInserting"
+                                                    OnItemEditing="ServiceDetailPartsListView_ItemEditing"
+                                                    OnItemUpdating="ServiceDetailPartsListView_ItemUpdating"
                                                     OnItemCanceling="ServiceDetailPartsListView_ItemCanceling"
-                                                    OnItemDeleting="ServiceDetailPartsListView_ItemDeleting">
+                                                    OnItemDeleting="ServiceDetailPartsListView_ItemDeleting"
+                                                    OnItemDataBound="ServiceDetailPartsListView_ItemDataBound">
                                                     <LayoutTemplate>
                                                         <div class="table-responsive">
-                                                            <table runat="server" id="itemPlaceholderContainer" class="table table-striped table-hover table-sm mb-0">
+                                                            <table runat="server" id="itemPlaceholderContainer" class="table table-striped table-hover table-sm mb-0 table-borderless">
                                                                 <caption>List of current service detail parts</caption>
                                                                 <thead>
                                                                     <tr runat="server" class="thead-dark text-center align-middle">
-                                                                        <th runat="server" scope="col" hidden>Service Detail ID</th>
-                                                                        <th runat="server" scope="col" hidden>Service Detail Part ID</th>
                                                                         <th runat="server" scope="col">Part #</th>
                                                                         <th runat="server" scope="col">Description</th>
                                                                         <th runat="server" scope="col">Quantity</th>
-                                                                        <th runat="server" scope="col">Actions</th>
+                                                                        <th runat="server" scope="col"></th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
@@ -445,113 +438,73 @@
                                                     </EmptyDataTemplate>
                                                     <ItemTemplate>
                                                         <tr class="text-center">
-                                                            <td hidden class="align-middle">
-                                                                <asp:Label Text='<%# Eval("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" /></td>
-                                                            <td hidden class="align-middle">
-                                                                <asp:Label Text='<%# Eval("ServiceDetailPartID") %>' runat="server" ID="ServiceDetailPartIDLabel" /></td>
                                                             <td class="align-middle" style="min-width:4rem;">
+                                                                <asp:Label Text='<%# Eval("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" Visible="false"/>
+                                                                <asp:Label Text='<%# Eval("ServiceDetailPartID") %>' runat="server" ID="ServiceDetailPartIDLabel" Visible="false"/>
                                                                 <asp:Label Text='<%# Eval("PartID") %>' runat="server" ID="PartIDLabel" /></td>
                                                             <td class="align-middle">
                                                                 <asp:Label Text='<%# Eval("PartDescription") %>' runat="server" ID="PartDescriptionLabel" /></td>
                                                             <td class="align-middle">
-                                                                <asp:Label Text='<%# Eval("Quantity") %>' runat="server" ID="QuantityLabel" /></td>
+                                                                <asp:LinkButton runat="server" CommandName="Edit" ID="EditPartButton" CssClass="btn btn-link btn-block btn-sm text-decoration-none" ToolTip="Edit Quantity">
+                                                                    <asp:Label Text='<%# Eval("Quantity") %>' runat="server" ID="QuantityLabel" />
+                                                                    <span class="float-right"><i class="bi bi-pencil-fill h5"></i></span>
+                                                                </asp:LinkButton></td>
                                                             <td class="align-middle">
-                                                                <span class="btn-group btn-group-sm" role="group">
-                                                                    <asp:LinkButton runat="server" CommandName="Edit" Text="Edit" ID="EditPartButton" CssClass="btn btn-primary btn-sm" ToolTip="Edit Quantity"><i class="far fa-edit"></i></asp:LinkButton>
-                                                                    <asp:LinkButton runat="server" CommandName="Delete" Text="Remove" ID="RemovePartButton" CssClass="btn btn-danger btn-sm" ToolTip="Remove Part(s)"><i class="far fa-trash-alt"></i></asp:LinkButton>
-                                                                </span>
+                                                                <asp:LinkButton runat="server" CommandName="Delete" Text="Remove" ID="RemovePartButton" CssClass="btn btn-link btn-block btn-sm text-decoration-none text-danger" ToolTip="Remove Part(s)">
+                                                                    <i class="bi bi-trash-fill h5"></i>
+                                                                </asp:LinkButton>
                                                             </td>
                                                         </tr>
                                                     </ItemTemplate>
-                                                    <SelectedItemTemplate>
-                                                        <tr class="table-warning text-center">
-                                                            <td hidden>
-                                                                <asp:Label Text='<%# Eval("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" /></td>
-                                                            <td hidden>
-                                                                <asp:Label Text='<%# Eval("ServiceDetailPartID") %>' runat="server" ID="ServiceDetailPartIDLabel" /></td>
-                                                            <td>
-                                                                <asp:Label Text='<%# Eval("PartID") %>' runat="server" ID="PartIDLabel" /></td>
-                                                            <td>
-                                                                <asp:Label Text='<%# Eval("PartDescription") %>' runat="server" ID="PartDescriptionLabel" /></td>
-                                                            <td>
-                                                                <asp:Label Text='<%# Eval("Quantity") %>' runat="server" ID="QuantityLabel" /></td>
-                                                            <td>
-                                                                <asp:Button runat="server" CommandName="Cancel" Text="Cancel" ID="CancelEditPartButton" CssClass="btn btn-secondary btn-sm"/></td>
-                                                        </tr>
-                                                    </SelectedItemTemplate>
                                                     <EditItemTemplate>
-                                                        <tr class="table-warning text-center">
-                                                            <td hidden>
-                                                                <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" /></td>
-                                                            <td hidden>
-                                                                <asp:Label Text='<%# Bind("ServiceDetailPartID") %>' runat="server" ID="ServiceDetailPartIDLabel" /></td>
+                                                        <tr class="table-active text-center">
+                                                            <td class="align-middle" style="min-width:4rem;">
+                                                                <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" Visible="false" />
+                                                                <asp:Label Text='<%# Bind("ServiceDetailPartID") %>' runat="server" ID="ServiceDetailPartIDLabel" Visible="false" />
+                                                                <asp:Label Text='<%# Bind("PartID") %>' runat="server" ID="PartIDTextBox"/></td>
                                                             <td class="align-middle">
-                                                                <asp:TextBox Text='<%# Bind("PartID") %>' runat="server" ID="PartIDTextBox" CssClass="form-control"/></td>
-                                                                <%--<asp:ObjectDataSource ID="PartsListODS" runat="server"
-                                                                    OldValuesParameterFormatString="original_{0}"
-                                                                    SelectMethod="List_Parts"
-                                                                    TypeName="BSMS.System.BLL.ServiceController"/>
-                                                                <asp:DropDownList ID="PartsDropDownList" runat="server"
-                                                                    CssClass="custom-select"
-                                                                    DataSourceID="PartsListODS"
-                                                                    DataTextField="Description"
-                                                                    DataValueField="PartID"
-                                                                    AppendDataBoundItems="true">
-                                                                    <asp:ListItem Value="0" Selected="True">Select...</asp:ListItem>
-                                                                </asp:DropDownList></td>--%>
-                                                            <td>
                                                                 <asp:Label Text='<%# Bind("PartDescription") %>' runat="server" ID="PartDescriptionLabel" /></td>
                                                             <td class="align-middle">
-                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control"/></td>
+                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"/></td>
                                                             <td class="align-middle">
-                                                                <span class="btn-group btn-group-sm" role="group">
-                                                                    <asp:LinkButton ID="AddServiceDetailPartButton" runat="server" CommandName="Insert" Text="Add Part" CssClass="btn btn-success btn-sm" OnClick="AddServiceDetailPartButton_Click" ToolTip="Add Part"><i class="fas fa-plus"></i></asp:LinkButton>
-                                                                    <asp:LinkButton ID="ClearServiceDetailPartButton" runat="server" CommandName="Cancel" Text="Clear" CssClass="btn btn-secondary btn-sm" ToolTip="Clear"><i class="fas fa-eraser"></i></asp:LinkButton>
-                                                                </span></td>
+                                                                <asp:LinkButton ID="AddServiceDetailPartButton" runat="server" CommandName="Update" CssClass="btn btn-link btn-sm text-decoration-none text-success" ToolTip="Save Changes">
+                                                                   <i class="bi bi-check-circle-fill h5"></i>
+                                                                </asp:LinkButton>
+                                                                <asp:LinkButton ID="ClearServiceDetailPartButton" runat="server" CommandName="Cancel" CssClass="btn btn-link btn-sm text-decoration-none text-secondary" ToolTip="Discard Changes">
+                                                                    <i class="bi bi-x-circle-fill h5"></i>
+                                                                </asp:LinkButton>
+                                                            </td>
                                                         </tr>
                                                     </EditItemTemplate>
                                                     <InsertItemTemplate>
-                                                        <tr class="table-success text-center">
-                                                            <td hidden>
-                                                                <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" /></td>
-                                                            <td hidden>
-                                                                <asp:Label Text='<%# Bind("ServiceDetailPartID") %>' runat="server" ID="ServiceDetailPartIDLabel" /></td>
+                                                        <tr class="table-active bg-transparent text-center">
+                                                            <td class="align-middle" style="min-width:4rem;" colspan="2">
+                                                                <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" Visible="false" />
+                                                                <asp:Label Text='<%# Bind("ServiceDetailPartID") %>' runat="server" ID="ServiceDetailPartIDLabel" Visible="false"/>
+                                                                <asp:TextBox Text='<%# Bind("PartID") %>' runat="server" ID="PartIDTextBox" CssClass="form-control" placeholder="Enter Part #"/>
+                                                                <asp:Label Text='<%# Bind("PartDescription") %>' runat="server" ID="PartDescriptionLabel" Visible="false"/></td>
                                                             <td class="align-middle">
-                                                                <asp:TextBox Text='<%# Bind("PartID") %>' runat="server" ID="PartIDTextBox" CssClass="form-control"/></td>
-                                                                <%--<asp:ObjectDataSource ID="PartsListODS" runat="server"
-                                                                    OldValuesParameterFormatString="original_{0}"
-                                                                    SelectMethod="List_Parts"
-                                                                    TypeName="BSMS.System.BLL.ServiceController"/>
-                                                                <asp:DropDownList ID="PartsDropDownList" runat="server"
-                                                                    CssClass="custom-select"
-                                                                    DataSourceID="PartsListODS"
-                                                                    DataTextField="Description"
-                                                                    DataValueField="PartID"
-                                                                    AppendDataBoundItems="true">
-                                                                    <asp:ListItem Value="0" Selected="True">Select...</asp:ListItem>
-                                                                </asp:DropDownList></td>--%>
-                                                            <td>
-                                                                <asp:Label Text='<%# Bind("PartDescription") %>' runat="server" ID="PartDescriptionLabel" /></td>
+                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"/></td>
                                                             <td class="align-middle">
-                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control"/></td>
-                                                            <td class="align-middle">
-                                                                <span class="btn-group btn-group-sm" role="group">
-                                                                    <asp:LinkButton ID="AddServiceDetailPartButton" runat="server" CommandName="Insert" Text="Add Part" CssClass="btn btn-success btn-sm" OnClick="AddServiceDetailPartButton_Click" ToolTip="Add Part"><i class="fas fa-plus"></i></asp:LinkButton>
-                                                                    <asp:LinkButton ID="ClearServiceDetailPartButton" runat="server" CommandName="Cancel" Text="Clear" CssClass="btn btn-secondary btn-sm" ToolTip="Clear"><i class="fas fa-eraser"></i></asp:LinkButton>
-                                                                </span></td>
+                                                                    <asp:LinkButton ID="AddServiceDetailPartButton" runat="server" CommandName="Insert" CssClass="btn btn-link btn-sm text-decoration-none text-success p-0" ToolTip="Add Part">
+                                                                        <i class="bi bi-plus-circle-fill h5"></i>
+                                                                    </asp:LinkButton>
+                                                                    <asp:LinkButton ID="ClearServiceDetailPartButton" runat="server" CommandName="Cancel" CssClass="btn btn-link btn-sm text-decoration-none text-secondary p-0" ToolTip="Clear Quantity">
+                                                                        <i class="bi bi-backspace-fill h5"></i>
+                                                                    </asp:LinkButton></td>
                                                         </tr>
                                                     </InsertItemTemplate>
                                                 </asp:ListView>
                                             </div>
                                         </div>
                                     </div>
-                                </asp:Panel>
+                                </div>
                             </div>
-                        </div>
+                        </asp:Panel>
                     </div>
-                </asp:Panel>
+                </div>
             </div>
-        </div>
+        </asp:Panel>
             
     </div>
     

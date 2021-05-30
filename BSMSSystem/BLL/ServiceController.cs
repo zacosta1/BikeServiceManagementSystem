@@ -63,7 +63,7 @@ namespace BSMSSystem.BLL
         }
 
         [DataObjectMethod(DataObjectMethodType.Select, false)]
-        public List<ServicePOCO> List_CurrentServices()
+        public List<ServicePOCO> List_Services()
         {
             using (var context = new BSMSContext())
             {
@@ -85,7 +85,7 @@ namespace BSMSSystem.BLL
         }
 
         [DataObjectMethod(DataObjectMethodType.Select, false)]
-        public List<ServiceDetailPOCO> List_ServiceDetailsByServiceID(int serviceId)
+        public List<ServiceDetailPOCO> List_ServiceDetails(int serviceId)
         {
             using (var context = new BSMSContext())
             {
@@ -136,7 +136,7 @@ namespace BSMSSystem.BLL
         }
 
         [DataObjectMethod(DataObjectMethodType.Select, false)]
-        public List<ServiceDetailPartPOCO> List_CurrentServiceDetailPartsByServiceDetailID(int serviceDetailId)
+        public List<ServiceDetailPartPOCO> List_ServiceDetailParts(int serviceDetailId)
         {
             using (var context = new BSMSContext())
             {
@@ -156,7 +156,7 @@ namespace BSMSSystem.BLL
         }
 
         [DataObjectMethod(DataObjectMethodType.Insert, false)]
-        public void Add_NewService(Job service, JobDetail serviceDetail)
+        public void Add_Service(Job service, JobDetail serviceDetail)
         {
             using (var context = new BSMSContext())
             {
@@ -167,7 +167,7 @@ namespace BSMSSystem.BLL
         }
 
         [DataObjectMethod(DataObjectMethodType.Insert, false)]
-        public void Add_NewServiceDetail(JobDetail serviceDetail)
+        public void Add_ServiceDetail(JobDetail serviceDetail)
         {
             using (var context = new BSMSContext())
             {
@@ -177,7 +177,7 @@ namespace BSMSSystem.BLL
         }
 
         [DataObjectMethod(DataObjectMethodType.Insert, false)]
-        public void Add_NewServiceDetailPart(int serviceDetailId, int partId, short quantity)
+        public void Add_ServiceDetailPart(int serviceDetailId, int partId, short quantity)
         {
             using (var context = new BSMSContext())
             {
@@ -248,17 +248,36 @@ namespace BSMSSystem.BLL
         }
 
         [DataObjectMethod(DataObjectMethodType.Update, false)]
-        public int Update_ServiceDetail(JobDetail item)
+        public void Update_ServiceDetail_AppendComment(int serviceDetailId,string existingComments, string inputComments)
         {
             using (var context = new BSMSContext())
             {
-                context.Entry(item).State = System.Data.Entity.EntityState.Modified;
-                return context.SaveChanges();
+                var serviceDetail = (from x in context.JobDetails
+                                     where x.JobDetailID == serviceDetailId
+                                     select x).FirstOrDefault();
+
+                //initialize string to capture merged existing and input comments
+                string mergedComments = null;
+
+                //add a semi-colon as a separator between comments if there's an existing comment
+                if (string.IsNullOrWhiteSpace(existingComments))
+                {
+                    mergedComments += inputComments;
+                }
+                else
+                {
+                    mergedComments = "; " + inputComments;
+                }
+
+                //apply update to service detail comments
+                serviceDetail.Comments = mergedComments;
+                context.Entry(serviceDetail).State = System.Data.Entity.EntityState.Modified;
+                context.SaveChanges();
             }
         }
 
         [DataObjectMethod(DataObjectMethodType.Update, false)]
-        public void Update_ServiceDetailStatus(int serviceId, int serviceDetailId, bool? newStatus)
+        public void Update_ServiceDetail_Status(int serviceId, int serviceDetailId, bool? newStatus)
         {
             using (var context = new BSMSContext())
             {
@@ -298,6 +317,24 @@ namespace BSMSSystem.BLL
                 //save changes to the database
                 context.Entry(serviceDetail).State = System.Data.Entity.EntityState.Modified;
                 context.Entry(service).State = System.Data.Entity.EntityState.Modified;
+                context.SaveChanges();
+            }
+        }
+
+        [DataObjectMethod(DataObjectMethodType.Update, false)]
+        public void Update_ServiceDetailPart_Quantity(int serviceDetailPartId, short quantity)
+        {
+            using (var context = new BSMSContext())
+            {
+                var serviceDetailPart = (from x in context.JobDetailParts
+                                         where x.JobDetailPartID == serviceDetailPartId
+                                         select x).FirstOrDefault();
+
+                //update service detail status
+                serviceDetailPart.Quantity = quantity;
+
+                //save changes to the database
+                context.Entry(serviceDetailPart).State = System.Data.Entity.EntityState.Modified;
                 context.SaveChanges();
             }
         }

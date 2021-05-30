@@ -18,7 +18,7 @@ public partial class User_Controls_MessageUserControl : System.Web.UI.UserContro
     private const string STR_TITLE_ValidationErrors = "Validation Errors";
     private const string STR_TEXT_ValidationErrors = "Validation errors encountered with your submission.";
     private const string STR_TITLE_UsageInstructions = "Usage Instructions";
-    private const string STR_TITLE_ICON_danger = "bi bi-x-circle-fill mr-2 text-danger";
+    private const string STR_TITLE_ICON_danger = "bi bi-x-octagon-fill mr-2 text-danger";
     private const string STR_CARD_danger = "toast border-danger show text-danger";
     private const string STR_TITLE_ICON_info = "bi bi-info-circle-fill mr-2 text-info";
     private const string STR_CARD_info = "toast border-info show text-info";

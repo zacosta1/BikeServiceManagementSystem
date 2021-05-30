@@ -56,18 +56,8 @@ public partial class Servicing : System.Web.UI.Page
         MessageUserControl.HandleDataBoundException(e);
     }
 
-    protected void ResetServiceDetailsPanel()
-    {
-        SelectedServiceIDLabel.Text = null;
-        SelectedServiceCustomerNameLabel.Text = null;
-        SelectedServiceVehicleIdentificationLabel.Text = null;
-
-        ResetServiceDetailsListView();
-    }
-
     #region Create New Service
-
-    protected void ClearNewServicesForm()
+    protected void Clear_AddNewServicesForm()
     {
         CustomerDropDownList.SelectedIndex = 0;
         ServiceVehicleIdentificationTextBox.Text = "";
@@ -134,7 +124,7 @@ public partial class Servicing : System.Web.UI.Page
 
                     //add the new service to the database
                     ServiceController sysmgr = new ServiceController();
-                    sysmgr.Add_NewService(newService, newServiceDetail);
+                    sysmgr.Add_Service(newService, newServiceDetail);
                     //refresh Listview
                     ServicesListView.DataBind();
 
@@ -143,7 +133,7 @@ public partial class Servicing : System.Web.UI.Page
                     ServicesListView_SelectedIndexChanged(sender, e);
 
                     //clear form fields
-                    ClearNewServicesForm();
+                    Clear_AddNewServicesForm();
 
                 }, "Success", "New service added and selected.");
             }
@@ -152,20 +142,6 @@ public partial class Servicing : System.Web.UI.Page
     #endregion
 
     #region Manage Current Services
-
-    protected void ResetServiceDetailsListView()
-    {
-        ServiceDetailPartsListView.SelectedIndex = -1;
-        ServiceDetailPartsListView.EditIndex = -1;
-        ServiceDetailPartsListView.DataSource = null;
-        ServiceDetailPartsListView.DataBind();
-
-        ServiceDetailsListView.SelectedIndex = -1;
-        ServiceDetailsListView.EditIndex = -1;
-        ServiceDetailsListView.DataSource = null;
-        ServiceDetailsListView.DataBind();
-    }
-
     protected void ServicesListView_SelectedIndexChanged(object sender, EventArgs e)
     {
         ResetServiceDetailsListView();
@@ -182,12 +158,9 @@ public partial class Servicing : System.Web.UI.Page
         SelectedServiceVehicleIdentificationLabel.Text = vehicleIdentification;
 
         ServiceController sysmgr = new ServiceController();
-        List<ServiceDetailPOCO> serviceDetailList = sysmgr.List_ServiceDetailsByServiceID(serviceId);
+        List<ServiceDetailPOCO> serviceDetailList = sysmgr.List_ServiceDetails(serviceId);
         ServiceDetailsListView.DataSource = serviceDetailList;
         ServiceDetailsListView.DataBind();
-
-        //scroll page to bottom
-        //ClientScript.RegisterClientScriptBlock(this.GetType(), "", "window.onload=function(){window.scrollTo(0,document.body.scrollHeight)};", true);
     }
 
     protected void DeselectServiceButton_Click(object sender, EventArgs e)
@@ -197,7 +170,82 @@ public partial class Servicing : System.Web.UI.Page
 
         ResetServiceDetailsListView();
     }
+    protected void ServicesListView_ItemDataBound(object sender, ListViewItemEventArgs e)
+    {
+        if (ServicesListView.SelectedIndex != -1)
+        {
+            if (e.Item.DisplayIndex != ServicesListView.SelectedIndex)
+            {
+                e.Item.Visible = false;
+            }
+
+            ServiceDetailsPanel.Visible = true;
+        }
+    }
     #endregion
+
+    #region Manage Service Details
+    protected void ResetServiceDetailsListView()
+    {
+        ServiceDetailPartsListView.SelectedIndex = -1;
+        ServiceDetailPartsListView.EditIndex = -1;
+        ServiceDetailPartsListView.DataSource = null;
+        ServiceDetailPartsListView.DataBind();
+
+        ServiceDetailsListView.SelectedIndex = -1;
+        ServiceDetailsListView.EditIndex = -1;
+        ServiceDetailsListView.DataSource = null;
+        ServiceDetailsListView.DataBind();
+    }
+
+    protected void ResetServiceDetailsPanel()
+    {
+        SelectedServiceIDLabel.Text = null;
+        SelectedServiceCustomerNameLabel.Text = null;
+        SelectedServiceVehicleIdentificationLabel.Text = null;
+
+        ResetServiceDetailsListView();
+    }
+
+    protected void ServiceDetailsListView_ItemDataBound(object sender, ListViewItemEventArgs e)
+    {
+        //check if there's an item selected or being edited
+        if ((ServiceDetailsListView.SelectedIndex != -1) || (ServiceDetailsListView.EditIndex != -1))
+        {
+            //hide items that are neither selected nor being edited
+            if ((e.Item.DisplayIndex != ServiceDetailsListView.SelectedIndex) && (e.Item.DisplayIndex != ServiceDetailsListView.EditIndex))
+            {
+                e.Item.Visible = false;
+            }
+        }
+        //else, if no item is being edited or selected...
+        else
+        {
+            string currentServiceDetailStatus = (e.Item.FindControl("StatusLabel") as Label).Text.Trim().ToLower();
+            Button serviceStatusUpdateButton = e.Item.FindControl("ServiceStatusButton") as Button;
+            Button removeServiceButton = e.Item.FindControl("RemoveServiceDetailButton") as Button;
+
+            //modify StatusUpdate button text depending on each service detail's current status
+            switch (currentServiceDetailStatus)
+            {
+                case null:
+                    serviceStatusUpdateButton.Text = "Start";
+                    break;
+                case "started":
+                    serviceStatusUpdateButton.Text = "Finish";
+                    serviceStatusUpdateButton.ToolTip = "Finish Service Detail";
+                    removeServiceButton.Visible = false;
+                    break;
+                case "done":
+                    serviceStatusUpdateButton.Visible = false;
+                    removeServiceButton.Visible = false;
+                    break;
+                default:
+                    serviceStatusUpdateButton.Text = "Start";
+                    break;
+            }
+        }
+    }
 
     protected void ServiceDetailsListView_SelectedIndexChanging(object sender, ListViewSelectEventArgs e)
     {
@@ -209,7 +257,7 @@ public partial class Servicing : System.Web.UI.Page
         ListViewItem serviceRow = ServicesListView.Items[ServicesListView.SelectedIndex];
         int serviceId = int.Parse((serviceRow.FindControl("ServiceIDLabel") as Label).Text);
         ServiceController sysmgr = new ServiceController();
-        List<ServiceDetailPOCO> serviceDetailList = sysmgr.List_ServiceDetailsByServiceID(serviceId);
+        List<ServiceDetailPOCO> serviceDetailList = sysmgr.List_ServiceDetails(serviceId);
         ServiceDetailsListView.DataSource = serviceDetailList;
         ServiceDetailsListView.DataBind();
 
@@ -217,10 +265,12 @@ public partial class Servicing : System.Web.UI.Page
         int selectedServiceDetailID = int.Parse((selectedServiceDetail.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
         string selectedServiceDetailDescription = (selectedServiceDetail.FindControl("DescriptionLabel") as Label).Text.Trim();
 
-        List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_CurrentServiceDetailPartsByServiceDetailID(selectedServiceDetailID);
+        List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(selectedServiceDetailID);
 
         SelectedServiceDetailDescriptionLabel.Text = selectedServiceDetailDescription;
+        SelectedServiceDetailDescriptionLabel2.Text = selectedServiceDetailDescription;
 
+        ServiceDetailPartsListView.InsertItemPosition = (InsertItemPosition)2;
         ServiceDetailPartsListView.DataSource = serviceDetailPartsList;
         ServiceDetailPartsListView.DataBind();
     }
@@ -233,7 +283,7 @@ public partial class Servicing : System.Web.UI.Page
         ListViewItem serviceRow = ServicesListView.Items[ServicesListView.SelectedIndex];
         int serviceId = int.Parse((serviceRow.FindControl("ServiceIDLabel") as Label).Text);
         ServiceController sysmgr = new ServiceController();
-        List<ServiceDetailPOCO> serviceDetailList = sysmgr.List_ServiceDetailsByServiceID(serviceId);
+        List<ServiceDetailPOCO> serviceDetailList = sysmgr.List_ServiceDetails(serviceId);
         ServiceDetailsListView.DataSource = serviceDetailList;
         ServiceDetailsListView.DataBind();
 
@@ -259,13 +309,11 @@ public partial class Servicing : System.Web.UI.Page
         ListViewItem serviceRow = ServicesListView.Items[ServicesListView.SelectedIndex];
         int serviceId = int.Parse((serviceRow.FindControl("ServiceIDLabel") as Label).Text);
         ServiceController sysmgr = new ServiceController();
-        List<ServiceDetailPOCO> serviceDetailList = sysmgr.List_ServiceDetailsByServiceID(serviceId);
+        List<ServiceDetailPOCO> serviceDetailList = sysmgr.List_ServiceDetails(serviceId);
         ServiceDetailsListView.DataSource = serviceDetailList;
         ServiceDetailsListView.SelectedIndex = -1;
         ServiceDetailsListView.InsertItemPosition = (InsertItemPosition)2;
         ServiceDetailsListView.DataBind();
-
-        //CheckStatusForButtonVisibility();
 
         ServiceDetailPartsListView.DataSource = null;
         ServiceDetailPartsListView.DataBind();
@@ -277,7 +325,7 @@ public partial class Servicing : System.Web.UI.Page
 
         if ((e.CommandName.Equals("Edit")) || (e.CommandName.Equals("Select")))
         {
-            ServiceDetailsListView.InsertItemPosition = (InsertItemPosition)0;
+            ServiceDetailsListView.InsertItemPosition = 0;
             ServiceDetailsPanel.Visible = true;
         }
         else if (e.CommandName.Equals("Cancel"))
@@ -308,13 +356,13 @@ public partial class Servicing : System.Web.UI.Page
             {
                 //set status to Started
                 newStatus = false;
-                customSuccessMessage = description + " for service #" + serviceId + " has started.";
+                customSuccessMessage = description + " service detail for service #" + serviceId + " has started.";
             }
             else if (status == "Started")
             {
                 //set status to Done
                 newStatus = true;
-                customSuccessMessage = description + " for service #" + serviceId + " has finished.";
+                customSuccessMessage = description + " service detail for service #" + serviceId + " has finished.";
             }
 
             MessageUserControl.Visible = true;
@@ -323,7 +371,7 @@ public partial class Servicing : System.Web.UI.Page
                 ServiceController sysmgr = new ServiceController();
 
                 //update service detail status and appropriate service dates
-                sysmgr.Update_ServiceDetailStatus(serviceId, serviceDetailId, newStatus);
+                sysmgr.Update_ServiceDetail_Status(serviceId, serviceDetailId, newStatus);
 
                 //refresh current services list
                 ServicesODS.DataBind();
@@ -331,192 +379,70 @@ public partial class Servicing : System.Web.UI.Page
                 ServicesListView.SelectedIndex = serviceRowIndex;
 
                 //refresh current service detail list
-                List<ServiceDetailPOCO> detailResults = sysmgr.List_ServiceDetailsByServiceID(serviceId);
-
+                List<ServiceDetailPOCO> detailResults = sysmgr.List_ServiceDetails(serviceId);
                 ServiceDetailsListView.DataSource = detailResults;
                 ServiceDetailsListView.DataBind();
 
             }, "Status Updated", customSuccessMessage);
         }
-        else if (e.CommandName.Equals("Update"))
-        {
-            ServiceDetailsListView.InsertItemPosition = (InsertItemPosition)2;
-            ServiceDetailsPanel.Visible = true;
-
-            ListViewItem editRow = ServiceDetailsListView.EditItem;
-
-            int serviceId = int.Parse((editRow.FindControl("ServiceIDLabel") as Label).Text);
-            string existingComments = (editRow.FindControl("ServiceDetailCommentsLabel") as Label).Text.Trim();
-            string inputComments = (editRow.FindControl("ServiceDetailCommentsTextArea") as HtmlTextArea).InnerText.Trim();
-
-            string additionalComments = null;
-
-            //add a semi-colon as a separator between comments if there's an existing comment
-            if (string.IsNullOrWhiteSpace(existingComments))
-            {
-                additionalComments += inputComments;
-            }
-            else
-            {
-                additionalComments = "; " + inputComments;
-            }
-
-            MessageUserControl.Visible = true;
-            MessageUserControl.TryRun(() =>
-            {
-                JobDetail updatedItem = new JobDetail();
-                updatedItem.JobDetailID = int.Parse((editRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-                updatedItem.JobID = serviceId;
-                updatedItem.Description = (editRow.FindControl("ServiceDetailDescriptionLabel") as Label).Text;
-                updatedItem.JobHours = decimal.Parse((editRow.FindControl("ServiceDetailHoursLabel") as Label).Text);
-                updatedItem.Comments = (editRow.FindControl("ServiceDetailCommentsLabel") as Label).Text + additionalComments;
-
-                ServiceController sysmgr = new ServiceController();
-                sysmgr.Update_ServiceDetail(updatedItem);
-
-                //refresh current job detail list
-                List<ServiceDetailPOCO> detailResults = sysmgr.List_ServiceDetailsByServiceID(serviceId);
-
-                ServiceDetailsListView.DataSource = detailResults;
-                ServiceDetailsListView.EditIndex = -1;
-                ServiceDetailsListView.DataBind();
-            }, "Success", "Additional comments have been added to the currently selected service detail.");
-        }
-        else if (e.CommandName.Equals("Delete"))
-        {
-            //delete the service along with the only service detail associated with it
-            if (ServiceDetailsListView.Items.Count == 1)
-            {
-                ListViewItem serviceDetailRow = ServiceDetailsListView.Items[i];
-                int serviceDetailID = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-                int serviceID = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
-
-                MessageUserControl.Visible = true;
-                MessageUserControl.TryRun(() =>
-                {
-                    ServiceController sysmgr = new ServiceController();
-                    sysmgr.Delete_ServiceDetail(serviceDetailID);
-                    sysmgr.Delete_Service(serviceID);
-
-                    ClearNewServicesForm();
-
-                    //refresh service detail
-                    ServiceDetailsListView.DataBind();
-                    ServiceDetailsPanel.Visible = false;
-                    //refresh current services list
-                    ServicesListView.SelectedIndex = -1;
-                    ServicesListView.DataBind();
-
-                }, "Service Removed", "Service #" + serviceID + " had no more details and has been removed.");
-            }
-            //delete only the service detail
-            else
-            {
-                ListViewItem serviceDetailRow = ServiceDetailsListView.Items[i];
-                int serviceDetailID = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-                int serviceID = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
-
-                MessageUserControl.Visible = true;
-                MessageUserControl.TryRun(() =>
-                {
-                    ServiceController sysmgr = new ServiceController();
-                    sysmgr.Delete_ServiceDetail(serviceDetailID);
-
-                    ClearNewServicesForm();
-
-                    //refresh current service details list
-                    ServiceDetailsListView.DataSource = sysmgr.List_ServiceDetailsByServiceID(serviceID);
-                    ServiceDetailsListView.DataBind();
-
-                    //keep showing service details panel
-                    ServiceDetailsPanel.Visible = true;
-
-
-                }, "Service Detail Removed", "Service detail has been removed from service #" + serviceID + ".");
-            }
-        }
     }
 
     protected void ServiceDetailsListView_ItemDeleting(object sender, ListViewDeleteEventArgs e)
     {
-        //nothing so far
-    }
+        int i = e.ItemIndex;
 
-    protected void ServiceDetailPartsListView_ItemInserting(object sender, ListViewInsertEventArgs e)
-    {
-    }
-
-    protected void AddServiceDetailPartButton_Click(object sender, EventArgs e)
-    {
-        //get service detail ID from currently-selected item
-        ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
-        int jobDetailID = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-
-        //fetch input in the CurrentServiceDetailPartsListView insert row
-        ListViewItem serviceDetailPartInsertRow = ServiceDetailPartsListView.InsertItem;
-        int insertPartID = int.Parse((serviceDetailPartInsertRow.FindControl("PartIDTextBox") as TextBox).Text);
-        short insertQuantity = short.Parse((serviceDetailPartInsertRow.FindControl("QuantityTextBox") as TextBox).Text);
-
-        MessageUserControl.TryRun(() =>
+        //delete the service along with the only service detail associated with it
+        if (ServiceDetailsListView.Items.Count == 1)
         {
-            ServiceController sysmgr = new ServiceController();
-            sysmgr.Add_NewServiceDetailPart(jobDetailID, insertPartID, insertQuantity);
+            ListViewItem serviceDetailRow = ServiceDetailsListView.Items[i];
+            int serviceDetailID = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+            int serviceID = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
 
-            //refresh ListView
-            ListViewItem serviceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
-            int serviceDetailId = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-            List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_CurrentServiceDetailPartsByServiceDetailID(serviceDetailId);
-            ServiceDetailPartsListView.DataSource = serviceDetailPartsList;
-            ServiceDetailPartsListView.DataBind();
-
-            ResetServiceDetailsListView();
-
-        }, "Service Detail Part added", "Part #" + insertPartID + " has been added to the selected service detail");
-
-        //CreateNewServicePanel.Visible = false;
-        ServiceDetailsPanel.Visible = true;
-        ServiceDetailPartsPanel.Visible = true;
-        MessageUserControl.Visible = true;
-    }
-
-    protected void ServiceDetailPartsListView_ItemCanceling(object sender, ListViewCancelEventArgs e)
-    {
-        ListViewItem serviceDetailPartInsertRow = ServiceDetailPartsListView.InsertItem;
-        (serviceDetailPartInsertRow.FindControl("PartIDTextBox") as TextBox).Text = null;
-        (serviceDetailPartInsertRow.FindControl("QuantityTextBox") as TextBox).Text = null;
-
-        ServiceDetailsPanel.Visible = true;
-        ServiceDetailPartsPanel.Visible = true;
-    }
-
-    protected void ServiceDetailPartsListView_ItemCommand(object sender, ListViewCommandEventArgs e)
-    {
-        if (e.CommandName.Equals("Delete"))
-        {
-            int i = e.Item.DisplayIndex;
-            ListViewItem serviceDetailPartRow = ServiceDetailPartsListView.Items[i];
-            int serviceDetailPartID = int.Parse((serviceDetailPartRow.FindControl("ServiceDetailPartIDLabel") as Label).Text);
-
+            MessageUserControl.Visible = true;
             MessageUserControl.TryRun(() =>
             {
                 ServiceController sysmgr = new ServiceController();
-                sysmgr.Delete_ServiceDetailPart(serviceDetailPartID);
+                sysmgr.Delete_ServiceDetail(serviceDetailID);
+                sysmgr.Delete_Service(serviceID);
 
-                ServiceDetailPartsListView.DataBind();
+                Clear_AddNewServicesForm();
 
+                //refresh service detail
+                ServiceDetailsListView.DataBind();
+                ServiceDetailsPanel.Visible = false;
+                //refresh current services list
+                ServicesListView.SelectedIndex = -1;
+                ServicesListView.DataBind();
+
+            }, "Service Removed", "Service #" + serviceID + " had no more details and has been removed.");
+        }
+        //delete only the service detail
+        else
+        {
+            ListViewItem serviceDetailRow = ServiceDetailsListView.Items[i];
+            int serviceDetailID = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+            int serviceID = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
+
+            MessageUserControl.Visible = true;
+            MessageUserControl.TryRun(() =>
+            {
+                ServiceController sysmgr = new ServiceController();
+                sysmgr.Delete_ServiceDetail(serviceDetailID);
+
+                Clear_AddNewServicesForm();
+
+                //refresh current service details list
+                ServiceDetailsListView.DataSource = sysmgr.List_ServiceDetails(serviceID);
+                ServiceDetailsListView.DataBind();
+
+                //keep showing service details panel
                 ServiceDetailsPanel.Visible = true;
-                ServiceDetailPartsPanel.Visible = true;
-                MessageUserControl.Visible = true;
-            }, "Service Detail Part Removed", "Service detail part has been removed from current service detail.");
+
+            }, "Service Detail Removed", "Service detail has been removed from service #" + serviceID + ".");
         }
     }
 
-    protected void ServiceDetailPartsListView_ItemDeleting(object sender, ListViewDeleteEventArgs e)
-    {
-
-    }
-
-    protected void ServiceDetailListViewAddServiceDetailButton_Click(object sender, EventArgs e)
+    protected void ServiceDetailsListView_ItemInserting(object sender, ListViewInsertEventArgs e)
     {
         MessageUserControl.Visible = true;
         MessageUserControl.TryRun(() =>
@@ -526,12 +452,12 @@ public partial class Servicing : System.Web.UI.Page
             int selectedServiceID = int.Parse((selectedServiceRow.FindControl("ServiceIDLabel") as Label).Text);
 
             //fetch entered data in the insert row
-            ListViewItem insertServiceDetailRow = ServiceDetailsListView.InsertItem;
+            ListViewItem insertServiceDetailRow = e.Item;
             string description = (insertServiceDetailRow.FindControl("InsertRowServiceDetailDescriptionTextBox") as TextBox).Text.Trim();
             decimal hours = decimal.Parse((insertServiceDetailRow.FindControl("InsertRowServiceDetailHoursTextBox") as TextBox).Text.Trim());
             int couponId = int.Parse((insertServiceDetailRow.FindControl("InsertRowServiceDetailCouponDropDownList") as DropDownList).SelectedValue.Trim());
 
-            System.Web.UI.HtmlControls.HtmlTextArea commentsTextArea = (System.Web.UI.HtmlControls.HtmlTextArea)insertServiceDetailRow.FindControl("ServiceDetailCommentsTextArea");
+            HtmlTextArea commentsTextArea = insertServiceDetailRow.FindControl("ServiceDetailCommentsTextArea") as HtmlTextArea;
             string comments = commentsTextArea.InnerText.Trim();
             //string comments = (insertServiceDetailRow.FindControl("InsertRowServiceDetailCommentsTextBox") as TextBox).Text.Trim();
 
@@ -552,87 +478,196 @@ public partial class Servicing : System.Web.UI.Page
 
             //add the new service detail to the database
             ServiceController sysmgr = new ServiceController();
-            sysmgr.Add_NewServiceDetail(newServiceDetail);
+            sysmgr.Add_ServiceDetail(newServiceDetail);
             //refresh Listview
-            ServicesListView.DataBind();
-
-            //select the newly added service by selecting the last record in the ListView
-            ServicesListView.SelectedIndex = ServicesListView.Items.Count - 1;
             ServicesListView_SelectedIndexChanged(sender, e);
 
             //clear form fields
-            ClearNewServicesForm();
+            Clear_AddNewServicesForm();
 
-        }, "Success", "New service added and selected.");
-    }
-
-    protected void ServiceDetailsListView_ItemInserting(object sender, ListViewInsertEventArgs e)
-    {
-
-    }
-
-    protected void ServiceDetailPartsListView_ItemEditing(object sender, ListViewEditEventArgs e)
-    {
-
-    }
-
-    protected void ServicesListView_ItemDataBound(object sender, ListViewItemEventArgs e)
-    {
-        if (ServicesListView.SelectedIndex != -1)
-        {
-            if (e.Item.DisplayIndex != ServicesListView.SelectedIndex)
-            {
-                e.Item.Visible = false;
-            }
-
-            ServiceDetailsPanel.Visible = true;
-        }
-    }
-
-    protected void ServiceDetailsListView_ItemDataBound(object sender, ListViewItemEventArgs e)
-    {
-        //check if there's an item selected or being edited
-        if ((ServiceDetailsListView.SelectedIndex != -1) || (ServiceDetailsListView.EditIndex != -1))
-        {
-            //hide items that are neither selected nor being edited
-            if ((e.Item.DisplayIndex != ServiceDetailsListView.SelectedIndex) && (e.Item.DisplayIndex != ServiceDetailsListView.EditIndex))
-            {
-                e.Item.Visible = false;
-            }
-        }
-        //if no item is being edited or selected...
-        else
-        {
-            string currentServiceDetailStatus = (e.Item.FindControl("StatusLabel") as Label).Text.Trim().ToLower();
-            Button serviceStatusUpdateButton = e.Item.FindControl("ServiceStatusButton") as Button;
-            Button removeServiceButton = e.Item.FindControl("RemoveServiceDetailButton") as Button;
-
-            //modify StatusUpdate button text depending on each service detail's current status
-            switch (currentServiceDetailStatus)
-            {
-                case null:
-                    serviceStatusUpdateButton.Text = "Start";
-                    break;
-                case "started":
-                    serviceStatusUpdateButton.Text = "Finish";
-                    serviceStatusUpdateButton.ToolTip = "Finish Service Detail";
-                    removeServiceButton.Visible = false;
-                    break;
-                case "done":
-                    serviceStatusUpdateButton.Visible = false;
-                    removeServiceButton.Visible = false;
-                    break;
-                default:
-                    serviceStatusUpdateButton.Text = "Start";
-                    break;
-            }
-        }
-
-
+        }, "Success", "New service detail added to selected service.");
     }
 
     protected void ServiceDetailsListView_ItemUpdating(object sender, ListViewUpdateEventArgs e)
     {
-        
+        ServiceDetailsListView.InsertItemPosition = (InsertItemPosition)2;
+        ServiceDetailsPanel.Visible = true;
+
+        ListViewItem editRow = ServiceDetailsListView.Items[e.ItemIndex];
+
+        int serviceId = int.Parse((editRow.FindControl("ServiceIDLabel") as Label).Text);
+        int serviceDetailId = int.Parse((editRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+        string existingComments = (editRow.FindControl("ServiceDetailCommentsLabel") as Label).Text.Trim();
+        string inputComments = (editRow.FindControl("ServiceDetailCommentsTextArea") as HtmlTextArea).InnerText.Trim();
+
+        MessageUserControl.Visible = true;
+        MessageUserControl.TryRun(() =>
+        {
+            ServiceController sysmgr = new ServiceController();
+            sysmgr.Update_ServiceDetail_AppendComment(serviceDetailId, existingComments, inputComments);
+
+            //refresh current job detail list
+            List<ServiceDetailPOCO> detailResults = sysmgr.List_ServiceDetails(serviceId);
+
+            ServiceDetailsListView.DataSource = detailResults;
+            ServiceDetailsListView.EditIndex = -1;
+            ServiceDetailsListView.DataBind();
+        }, "Comment Append Successful", "Additional comments have been added to any existing comments in the currently-selected service detail.");
     }
+    #endregion
+
+    #region Manage Service Detail Parts
+    protected void ServiceDetailPartsListView_ItemDataBound(object sender, ListViewItemEventArgs e)
+    {
+        //if there are no items being edited
+        if (ServiceDetailPartsListView.EditIndex != -1)
+        {
+            //hide items that are not being edited
+            if (e.Item.DisplayIndex != ServiceDetailPartsListView.EditIndex)
+            {
+                e.Item.Visible = false;
+            }
+        }
+    }
+
+    protected void ServiceDetailPartsListView_ItemInserting(object sender, ListViewInsertEventArgs e)
+    {
+        //get Service detail ID from currently-selected service detail
+        ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
+        int serviceDetailID = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+
+        //fetch input in the CurrentServiceDetailPartsListView insert row
+        ListViewItem serviceDetailPartInsertRow = e.Item;
+        int insertPartID = int.Parse((serviceDetailPartInsertRow.FindControl("PartIDTextBox") as TextBox).Text);
+        short insertQuantity = short.Parse((serviceDetailPartInsertRow.FindControl("QuantityTextBox") as TextBox).Text);
+
+        MessageUserControl.Visible = true;
+        MessageUserControl.TryRun(() =>
+        {
+            ServiceController sysmgr = new ServiceController();
+            sysmgr.Add_ServiceDetailPart(serviceDetailID, insertPartID, insertQuantity);
+
+            //refresh Service Detail Parts ListView
+            List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(serviceDetailID);
+            ServiceDetailPartsListView.DataSource = serviceDetailPartsList;
+            ServiceDetailPartsListView.DataBind();
+
+        }, "Service Detail Part added", "Part #" + insertPartID + " has been added to the selected service detail");
+
+        ServiceDetailsPanel.Visible = true;
+        ServiceDetailPartsPanel.Visible = true;
+    }
+
+    protected void ServiceDetailPartsListView_ItemEditing(object sender, ListViewEditEventArgs e)
+    {
+        ServiceDetailPartsListView.EditIndex = e.NewEditIndex;
+        ServiceDetailPartsListView.InsertItemPosition = 0;
+        ServiceDetailsPanel.Visible = true;
+        ServiceDetailPartsPanel.Visible = true;
+
+        ListViewItem serviceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
+        int serviceDetailId = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+        ServiceController sysmgr = new ServiceController();
+        List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(serviceDetailId);
+        ServiceDetailPartsListView.DataSource = serviceDetailPartsList;
+        ServiceDetailPartsListView.DataBind();
+
+        ListViewItem serviceDetailPartRow = ServiceDetailPartsListView.EditItem;
+
+        var quantityTB = serviceDetailPartRow.FindControl("QuantityTextBox");
+        quantityTB.Focus();
+    }
+
+    protected void ServiceDetailPartsListView_ItemUpdating(object sender, ListViewUpdateEventArgs e)
+    {
+        ServiceDetailPartsListView.InsertItemPosition = (InsertItemPosition)2;
+        ServiceDetailsPanel.Visible = true;
+        ServiceDetailPartsPanel.Visible = true;
+
+        //ListViewItem editRow = ServiceDetailPartsListView.Items[e.ItemIndex];
+        ListViewItem editRow = ServiceDetailPartsListView.EditItem;
+
+        int serviceDetailPartId = int.Parse((editRow.FindControl("ServiceDetailPartIDLabel") as Label).Text);
+        int serviceDetailId = int.Parse((editRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+        short newQuantity = short.Parse((editRow.FindControl("QuantityTextBox") as TextBox).Text);
+
+        MessageUserControl.Visible = true;
+        MessageUserControl.TryRun(() =>
+        {
+            ServiceController sysmgr = new ServiceController();
+            sysmgr.Update_ServiceDetailPart_Quantity(serviceDetailPartId, newQuantity);
+
+            //refresh current service detail parts list
+            List<ServiceDetailPartPOCO> serviceDetailPartsResults = sysmgr.List_ServiceDetailParts(serviceDetailId);
+
+            ServiceDetailPartsListView.DataSource = serviceDetailPartsResults;
+            ServiceDetailPartsListView.EditIndex = -1;
+            ServiceDetailPartsListView.DataBind();
+        }, "Success", "Quantity updated.");
+    }
+
+    protected void ServiceDetailPartsListView_ItemCanceling(object sender, ListViewCancelEventArgs e)
+    {
+
+        ServiceController sysmgr = new ServiceController();
+        //if there's an item being edited, and the cancel button is clicked,
+        if (ServiceDetailPartsListView.EditIndex != -1)
+        {
+            ListViewItem editRow = ServiceDetailPartsListView.EditItem;
+            (editRow.FindControl("QuantityTextBox") as TextBox).Text = null;
+            ServiceDetailPartsListView.EditIndex = -1;
+            int serviceDetailId = int.Parse((editRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+
+            //refresh current service detail parts list
+            List<ServiceDetailPartPOCO> serviceDetailPartsResults = sysmgr.List_ServiceDetailParts(serviceDetailId);
+            ServiceDetailPartsListView.DataSource = serviceDetailPartsResults;
+        }
+        //else, if the cancel/clear button in the insert row is clicked,
+        else
+        {
+            ListViewItem insertRow = ServiceDetailPartsListView.InsertItem;
+            (insertRow.FindControl("PartIDTextBox") as TextBox).Text = null;
+            (insertRow.FindControl("QuantityTextBox") as TextBox).Text = null;
+
+            ListViewItem selectedServiceDetail = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
+            int serviceDetailId = int.Parse((selectedServiceDetail.FindControl("ServiceDetailIDLabel") as Label).Text);
+
+            //refresh current service detail parts list
+            List<ServiceDetailPartPOCO> serviceDetailPartsResults = sysmgr.List_ServiceDetailParts(serviceDetailId);
+            ServiceDetailPartsListView.DataSource = serviceDetailPartsResults;
+        }
+
+        ServiceDetailPartsListView.InsertItemPosition = (InsertItemPosition)2;
+        ServiceDetailPartsListView.DataBind();
+        ServiceDetailsPanel.Visible = true;
+        ServiceDetailPartsPanel.Visible = true;
+    }
+
+    protected void ServiceDetailPartsListView_ItemDeleting(object sender, ListViewDeleteEventArgs e)
+    {
+        ListViewItem serviceDetailPartRow = ServiceDetailPartsListView.Items[e.ItemIndex];
+        int serviceDetailPartID = int.Parse((serviceDetailPartRow.FindControl("ServiceDetailPartIDLabel") as Label).Text);
+
+        MessageUserControl.TryRun(() =>
+        {
+            //get Service detail ID from currently-selected service detail
+            ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
+            int serviceDetailID = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+
+            ServiceController sysmgr = new ServiceController();
+            sysmgr.Delete_ServiceDetailPart(serviceDetailPartID);
+
+            //refresh Service Detail Parts ListView
+            List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(serviceDetailID);
+            ServiceDetailPartsListView.DataSource = serviceDetailPartsList;
+            ServiceDetailPartsListView.DataBind();
+
+            ServiceDetailsPanel.Visible = true;
+            ServiceDetailPartsPanel.Visible = true;
+            MessageUserControl.Visible = true;
+        }, "Service Detail Part Removed", "Service detail part has been removed from current service detail.");
+    }
+    #endregion
+
+    
 }
