@@ -18,10 +18,10 @@ namespace BSMSData.Entities
 
         public int JobID { get; set; }
 
-        [Required]
-        [StringLength(100)]
+        [Required, StringLength(100)]
         public string Description { get; set; }
 
+        [Required]
         public decimal JobHours { get; set; }
 
         public string Comments { get; set; }

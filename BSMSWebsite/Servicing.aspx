@@ -12,13 +12,16 @@
 
     <div class="container">
         <div class="d-flex align-items-center justify-content-between">
-            <h2 class="card-title">Current Services</h2>
+            <h2 class="card-title"><asp:Label Text="Current Services" runat="server" ID="ServicesListViewTitle"/></h2>
 
-            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addNewServiceModal">
-                Add New Service
-            </button>
+            <asp:Panel runat="server" ID="AddNewServiceModalButtonPanel">
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addNewServiceModal">
+                    Add New Service
+                </button>
+            </asp:Panel>
+            
         </div>
-        <p class="card-subtitle mb-2 text-muted">Select a service to view or manage.</p>
+        <p class="card-subtitle mb-2 text-muted"><asp:Label Text="Select a service to view or manage." ID="ServicesListViewSubtitle" runat="server" /></p>
 
         <%-- Add New Service Modal --%>
         <div class="modal fade" id="addNewServiceModal" tabindex="-1" aria-labelledby="#addNewServiceModalLabel" aria-hidden="true">
@@ -53,11 +56,20 @@
                                         ToolTip="Select the customer for the service.">
                                         <asp:ListItem Text="Select..." Value="0" Selected="True"/>
                                     </asp:DropDownList>
+                                    <small>
+                                        <asp:RequiredFieldValidator ErrorMessage="A customer is required." ControlToValidate="CustomerDropDownList" runat="server"
+                                            CssClass="text-danger" ValidationGroup="NewServiceModalGroup" InitialValue="0" Display="Dynamic" SetFocusOnError ="true" />
+                                    </small>
                                 </div>
                     
                                 <div class="form-group col-md-6">
                                     <asp:Label runat="server" AssociatedControlID="ServiceVehicleIdentificationTextBox" Text="Vehicle Identification"/>
-                                    <asp:TextBox runat="server" ID="ServiceVehicleIdentificationTextBox" CssClass="form-control"/>
+                                    <asp:TextBox runat="server" ID="ServiceVehicleIdentificationTextBox" CssClass="form-control" MaxLength="50"/>
+                                    <small>
+                                        <asp:RequiredFieldValidator ErrorMessage="Vehicle ID or model description is required." ControlToValidate="ServiceVehicleIdentificationTextBox" runat="server"
+                                            CssClass="text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                    </small>
+                                        
                                 </div>
                             </div>
 
@@ -71,14 +83,27 @@
                                             <div class="form-row">
                                                 <div class="form-group col-12">
                                                     <asp:Label Text="Description" runat="server" AssociatedControlID="NewServiceModalServiceDetailDescriptionTextBox"/>
-                                                    <asp:TextBox runat="server" ID="NewServiceModalServiceDetailDescriptionTextBox" CssClass="form-control"/>
+                                                    <asp:TextBox runat="server" ID="NewServiceModalServiceDetailDescriptionTextBox" CssClass="form-control" MaxLength="100" />
+                                                    <small>
+                                                        <asp:RequiredFieldValidator ErrorMessage="A description is required." ControlToValidate="NewServiceModalServiceDetailDescriptionTextBox"
+                                                            runat="server" CssClass="form-text text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                                    </small>
                                                 </div>
                                             </div>
 
                                             <div class="form-row">
                                                 <div class="form-group col-5">
                                                     <asp:Label Text="Hours" runat="server" AssociatedControlID="NewServiceModalServiceDetailHoursTextBox"/>
-                                                    <asp:TextBox runat="server" ID="NewServiceModalServiceDetailHoursTextBox" CssClass="form-control"/>
+                                                    <asp:TextBox runat="server" ID="NewServiceModalServiceDetailHoursTextBox" CssClass="form-control" MaxLength="6"/>
+                                                    <small>
+                                                        <asp:RequiredFieldValidator ErrorMessage="Estimated duration is required." ControlToValidate="NewServiceModalServiceDetailHoursTextBox"
+                                                            runat="server"
+                                                            CssClass="text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic" SetFocusOnError ="true"/>
+                                                        <asp:RegularExpressionValidator ErrorMessage="Estimated duration requires a valid integer or a decimal number with one or two decimal places."
+                                                            ControlToValidate="NewServiceModalServiceDetailHoursTextBox" runat="server"
+                                                            ValidationExpression="((\d{1,3})((\.\d{1,2})?))$" CssClass="text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic"
+                                                            SetFocusOnError ="true" />
+                                                    </small>
                                                 </div>
                                                 <div class="form-group col-7">
                                                     <asp:Label Text="Coupon" runat="server" AssociatedControlID="NewServiceModalCouponDropDownList"/>
@@ -110,7 +135,8 @@
                     </div>
 
                     <div class="modal-footer">
-                        <asp:Button Text="Add New Service" runat="server" ID="NewServiceModalAddNewServiceButton" CssClass="btn btn-success" OnClick="AddNewServiceButton_Click"/>
+                        <asp:Button Text="Add New Service" runat="server" ID="NewServiceModalAddNewServiceButton" CssClass="btn btn-success" OnClick="AddNewServiceButton_Click"
+                            CausesValidation="true" ValidationGroup="NewServiceModalGroup"/>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
@@ -180,7 +206,8 @@
                                 <asp:Label Text='<%# Eval("VehicleIdentification") %>' runat="server" ID="VehicleIdentificationLabel" Visible="false" />
                             </td>
                             <td class="align-middle p-1">
-                                <asp:LinkButton runat="server" CommandName="Select" Text="Select" ID="SelectButton" CssClass="btn btn-link btn-block text-decoration-none p-0">
+                                <asp:LinkButton runat="server" CommandName="Select" Text="Select" ID="SelectButton" CssClass="btn btn-link btn-block text-decoration-none p-0"
+                                    CausesValidation="false">
                                     <i class="bi bi-gear-fill"></i>
                                 </asp:LinkButton>
                             </td>
@@ -202,7 +229,8 @@
                                 <asp:Label Text='<%# Eval("ContactNumber") %>' runat="server" ID="ContactNumberLabel" />
                                 <asp:Label Text='<%# Eval("VehicleIdentification") %>' runat="server" ID="VehicleIdentificationLabel" Visible="false" /></td>
                             <td class="align-middle p-1">
-                                <asp:LinkButton Text="Deselect" runat="server" ID="DeselectButton" OnClick="DeselectServiceButton_Click" CssClass="btn btn-link btn-block text-decoration-none p-0">
+                                <asp:LinkButton Text="Deselect" runat="server" ID="DeselectButton" OnClick="DeselectServiceButton_Click" CssClass="btn btn-link btn-block text-decoration-none p-0"
+                                    CausesValidation="false">
                                     <i class="bi bi-x h4"></i>
                                 </asp:LinkButton>
                             </td>
@@ -213,13 +241,15 @@
         </div>
         
         <asp:Panel runat="server" ID="ServiceDetailsPanel" CssClass="row">
-            <div class="container-fluid pb-3">
+            <div class="container-fluid px-3">
                 <div class="card">
                     <div class="card-body">
                         <div class="row mb-4">
                             <div class="col-12">
                                 <h3 class="card-title h4">Service #<asp:Label ID="SelectedServiceIDLabel" runat="server"/> Details</h3>
-                                <p class="card-subtitle text-muted">Manage a service detail of <asp:Label ID="SelectedServiceCustomerNameLabel" runat="server" CssClass="font-weight-bold"/>'s vehicle, <asp:Label ID="SelectedServiceVehicleIdentificationLabel" runat="server" CssClass="font-weight-bold"/>.</p>
+                                <p class="card-subtitle text-muted">Manage a service detail of 
+                                    <asp:Label ID="SelectedServiceCustomerNameLabel" runat="server" CssClass="font-weight-bold"/>'s vehicle, 
+                                    <asp:Label ID="SelectedServiceVehicleIdentificationLabel" runat="server" CssClass="font-weight-bold"/>.</p>
                             </div>
                         </div>                        
 
@@ -243,7 +273,7 @@
                                                 <thead>
                                                     <tr runat="server" class="thead-dark text-center align-middle">
                                                         <th runat="server" scope="col">Description</th>
-                                                        <th runat="server" scope="col">Hour(s)</th>
+                                                        <th runat="server" scope="col">Estimated Duration (In Hours)</th>
                                                         <th runat="server" scope="col">Coupon</th>
                                                         <th runat="server" scope="col">Comments</th>
                                                         <th runat="server" scope="col">Status</th>
@@ -288,18 +318,19 @@
                                                 <asp:Label Text='<%# Eval("Status") %>' runat="server" ID="StatusLabel" /></td>
                                             <td class="align-middle">
                                                 <div class="dropdown">
-                                                    <button type="button" class="btn btn-link btn-block text-decoration-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="serviceDetailsActionMenuButton" data-boundary="viewport">
+                                                    <button type="button" class="btn btn-link btn-block text-decoration-none" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                                        id="serviceDetailsActionMenuButton" data-boundary="viewport">
                                                         <i class="bi bi-three-dots-vertical"></i>
                                                     </button>
                                                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="serviceDetailsActionMenuButton">
                                                         <asp:Button runat="server" ID="ManagePartsButton" CommandName="Select"
                                                             CssClass="dropdown-item"
-                                                            Text="Manage Parts" ToolTip="Manage Service Detail Parts" type="button"/>
+                                                            Text="Manage Parts" ToolTip="Manage Service Detail Parts" type="button" CausesValidation="false"/>
                                                         <asp:Button runat="server" ID="ServiceStatusButton" CommandName="UpdateStatus"
-                                                            Text="Start" CssClass="dropdown-item" ToolTip="Start Service Detail" type="button"/>
+                                                            Text="Start" CssClass="dropdown-item" ToolTip="Start Service Detail" type="button" CausesValidation="false"/>
                                                         <asp:Button runat="server" ID="RemoveServiceDetailButton" CommandName="Delete"
                                                             CssClass="dropdown-item"
-                                                            Text="Remove" ToolTip="Remove Service Detail" type="button"/>
+                                                            Text="Remove" ToolTip="Remove Service Detail" type="button" CausesValidation="false"/>
                                                     </div>
                                                 </div>
                                             </td>
@@ -321,7 +352,8 @@
                                                 <asp:Label Text='<%# Eval("Status") %>' runat="server" ID="StatusLabel" />
                                             </td>
                                             <td class="align-middle">
-                                                <asp:LinkButton runat="server" ID="DeselectButton" OnClick="DeselectServiceDetailButton_Click" CssClass="btn btn-link btn-block text-decoration-none">
+                                                <asp:LinkButton runat="server" ID="DeselectButton" OnClick="DeselectServiceDetailButton_Click" CssClass="btn btn-link btn-block text-decoration-none"
+                                                    CausesValidation="false">
                                                     <i class="bi bi-x h4"></i>
                                                 </asp:LinkButton></td>
                                         </tr>
@@ -341,13 +373,21 @@
                                                 <div class="d-block d-flex align-items-center">
                                                     <textarea runat="server" ID="ServiceDetailCommentsTextArea" class="form-control flex-grow-1"
                                                         ToolTip="Add comments" Placeholder="Add comments..." style="min-height:2.5rem; min-width:12rem;" rows="1"/>
-                                                    <asp:LinkButton ID="UpdateServiceDetailButton" runat="server" CommandName="Update" CssClass="btn btn-link text-decoration-none text-success py-0 px-2 mx-auto" ToolTip="Add Comment">
+                                                    <asp:LinkButton ID="UpdateServiceDetailButton" runat="server" CommandName="Update"
+                                                        CssClass="btn btn-link text-decoration-none text-success py-0 px-2 mx-auto" ToolTip="Add Comment" CausesValidation="true"
+                                                        ValidationGroup="EditServiceDetailGroup">
                                                         <i class="bi bi-arrow-up-circle-fill h4"></i>
                                                     </asp:LinkButton>
-                                                    <asp:LinkButton ID="ClearServiceDetailButton" runat="server" CommandName="Cancel" CssClass="btn btn-link text-decoration-none text-secondary py-0 px-2" ToolTip="Cancel Comment">
+                                                    <asp:LinkButton ID="ClearServiceDetailButton" runat="server" CommandName="Cancel"
+                                                        CssClass="btn btn-link text-decoration-none text-secondary py-0 px-2" ToolTip="Cancel Comment" CausesValidation="false">
                                                         <i class="bi bi-x-circle-fill h4"></i>
                                                     </asp:LinkButton>
                                                 </div>
+                                                <small class="d-block text-left">
+                                                    <asp:RequiredFieldValidator ErrorMessage="Comments text field must not be empty."
+                                                        ControlToValidate="ServiceDetailCommentsTextArea" runat="server" CssClass="text-danger" ValidationGroup="EditServiceDetailGroup"
+                                                        Display="Dynamic" SetFocusOnError ="true"/>
+                                                </small>
                                             </td>
                                             <td class="align-middle">
                                                 <asp:Label Text='<%# Bind("Status") %>' runat="server" ID="StatusLabel" /></td>
@@ -356,13 +396,27 @@
                                     </EditItemTemplate>
                                     <InsertItemTemplate>
                                         <tr class="table-active bg-transparent text-center">
-                                            <td class="align-middle">
+                                            <td class="align-top">
                                                 <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" Visible="false"/>
                                                 <asp:Label Text='<%# Bind("ServiceID") %>' runat="server" ID="ServiceIDLabel" Visible="false"/>
-                                                <asp:TextBox Text='<%# Bind("Description") %>' runat="server" ID="InsertRowServiceDetailDescriptionTextBox" CssClass="form-control" placeholder="Description"/></td>
-                                            <td class="align-middle">
-                                                <asp:TextBox Text='<%# Bind("ServiceDetailHours") %>' runat="server" ID="InsertRowServiceDetailHoursTextBox" CssClass="form-control" placeholder="Hour(s)"/></td>
-                                            <td class="align-middle">
+                                                <asp:TextBox Text='<%# Bind("Description") %>' runat="server" ID="InsertRowServiceDetailDescriptionTextBox" CssClass="form-control"
+                                                    placeholder="Description" MaxLength="100" />
+                                                <small>
+                                                    <asp:RequiredFieldValidator ErrorMessage="A description is required." ControlToValidate="InsertRowServiceDetailDescriptionTextBox" runat="server"
+                                                        CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                                </small></td>
+                                            <td class="align-top">
+                                                <asp:TextBox Text='<%# Bind("ServiceDetailHours") %>' runat="server" ID="InsertRowServiceDetailHoursTextBox" CssClass="form-control"
+                                                    placeholder="Estimated Duration (in Hours)" MaxLength="6"/>
+                                                    <small>
+                                                        <asp:RequiredFieldValidator ErrorMessage="Estimated duration is required." ControlToValidate="InsertRowServiceDetailHoursTextBox" runat="server"
+                                                            CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                                        <asp:RegularExpressionValidator ErrorMessage="Estimated duration requires a valid integer or a decimal number with one or two decimal places."
+                                                            ControlToValidate="InsertRowServiceDetailHoursTextBox" runat="server"
+                                                            ValidationExpression="((\d{1,3})((\.\d{1,2})?))$" CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic"
+                                                            SetFocusOnError ="true" />
+                                                    </small></td>
+                                            <td class="align-top">
                                                 <asp:DropDownList runat="server" CssClass="custom-select" ID="InsertRowServiceDetailCouponDropDownList"
                                                     DataSourceID="CouponODS"
                                                     DataTextField="CouponIDValue"
@@ -370,15 +424,19 @@
                                                     AppendDataBoundItems="true">
                                                     <asp:ListItem Value="0" Selected="True">Select...</asp:ListItem>
                                                 </asp:DropDownList></td>
-                                            <td class="align-middle">
+                                            <td class="align-top">
                                                 <textarea runat="server" ID="ServiceDetailCommentsTextArea" class="form-control" style="min-height:2.5rem;" rows="1" placeholder="Comments"/>
                                             </td>
-                                            <td class="align-middle" colspan="2">
+                                            <td class="align-top" colspan="2">
                                                 <asp:Label Text='<%# Bind("Status") %>' runat="server" ID="StatusLabel" Visible="false" />
-                                                <asp:LinkButton ID="ServiceDetailListViewAddServiceDetailButton" runat="server" CommandName="Insert" Text="Add Service Detail" CssClass="btn btn-link text-decoration-none text-success p-0" ToolTip="Add Service Detail">
+                                                <asp:LinkButton ID="ServiceDetailListViewAddServiceDetailButton" runat="server" CommandName="Insert" Text="Add Service Detail"
+                                                    CssClass="btn btn-link text-decoration-none text-success p-0" ToolTip="Add Service Detail"
+                                                    CausesValidation="true" ValidationGroup="InsertServiceDetailGroup" >
                                                     <i class="bi bi-plus-circle-fill h4"></i>
                                                 </asp:LinkButton>
-                                                <asp:LinkButton ID="ServiceDetailListViewClearServiceDetailButton" runat="server" CommandName="Cancel" Text="Clear" CssClass="btn btn-link text-decoration-none text-secondary p-0" ToolTip="Clear">
+                                                <asp:LinkButton ID="ClearServiceDetailInsertRowButton" runat="server" CommandName="Cancel" Text="Clear"
+                                                    CssClass="btn btn-link text-decoration-none text-secondary p-0" ToolTip="Clear" CausesValidation="false"
+                                                    OnClick="ClearServiceDetailInsertRowButton_Click">
                                                     <i class="bi bi-backspace-fill h4"></i>
                                                 </asp:LinkButton>
                                             </td>
@@ -389,13 +447,14 @@
                         </div>
                         
                         <asp:Panel runat="server" ID="ServiceDetailPartsPanel" CssClass="row">
-                            <div class="container-fluid pb-3">
+                            <div class="container-fluid px-3">
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-12">
                                                 <h4 class="card-title"><asp:Label ID="SelectedServiceDetailDescriptionLabel" runat="server"/> Parts</h4>
-                                                <p class="card-subtitle mb-2 text-muted">Manage parts in inventory necessary for <asp:Label runat="server" ID="SelectedServiceDetailDescriptionLabel2" CssClass="font-weight-bold"/> service detail.</p>
+                                                <p class="card-subtitle mb-2 text-muted">Manage parts in inventory necessary for <asp:Label runat="server" ID="SelectedServiceDetailDescriptionLabel2"
+                                                    CssClass="font-weight-bold"/> service.</p>
                                     
                                                 <asp:ListView runat="server" ID="ServiceDetailPartsListView"
                                                     DataKeyNames="ServiceDetailID"
@@ -445,13 +504,15 @@
                                                             <td class="align-middle">
                                                                 <asp:Label Text='<%# Eval("PartDescription") %>' runat="server" ID="PartDescriptionLabel" /></td>
                                                             <td class="align-middle">
-                                                                <asp:LinkButton runat="server" CommandName="Edit" ID="EditPartButton" CssClass="btn btn-link btn-block btn-sm text-decoration-none" ToolTip="Edit Quantity">
+                                                                <asp:LinkButton runat="server" CommandName="Edit" ID="EditPartButton" CssClass="btn btn-link btn-block btn-sm text-decoration-none"
+                                                                    ToolTip="Edit Quantity">
                                                                     <asp:Label Text='<%# Eval("Quantity") %>' runat="server" ID="QuantityLabel" />
-                                                                    <span class="float-right"><i class="bi bi-pencil-fill h5"></i></span>
+                                                                    <span class="float-right"><i class="bi bi-pencil-fill h6"></i></span>
                                                                 </asp:LinkButton></td>
                                                             <td class="align-middle">
-                                                                <asp:LinkButton runat="server" CommandName="Delete" Text="Remove" ID="RemovePartButton" CssClass="btn btn-link btn-block btn-sm text-decoration-none text-danger" ToolTip="Remove Part(s)">
-                                                                    <i class="bi bi-trash-fill h5"></i>
+                                                                <asp:LinkButton runat="server" CommandName="Delete" Text="Remove" ID="RemovePartButton"
+                                                                    CssClass="btn btn-link btn-block btn-sm text-decoration-none text-danger" ToolTip="Remove Part(s)" CausesValidation="false">
+                                                                    <i class="bi bi-trash-fill h6"></i>
                                                                 </asp:LinkButton>
                                                             </td>
                                                         </tr>
@@ -467,31 +528,45 @@
                                                             <td class="align-middle">
                                                                 <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"/></td>
                                                             <td class="align-middle">
-                                                                <asp:LinkButton ID="AddServiceDetailPartButton" runat="server" CommandName="Update" CssClass="btn btn-link btn-sm text-decoration-none text-success" ToolTip="Save Changes">
-                                                                   <i class="bi bi-check-circle-fill h5"></i>
+                                                                <asp:LinkButton ID="AddServiceDetailPartButton" runat="server" CommandName="Update"
+                                                                    CssClass="btn btn-link btn-sm text-decoration-none text-success" ToolTip="Save Changes" CausesValidation="false">
+                                                                   <i class="bi bi-check-circle-fill h6"></i>
                                                                 </asp:LinkButton>
-                                                                <asp:LinkButton ID="ClearServiceDetailPartButton" runat="server" CommandName="Cancel" CssClass="btn btn-link btn-sm text-decoration-none text-secondary" ToolTip="Discard Changes">
-                                                                    <i class="bi bi-x-circle-fill h5"></i>
+                                                                <asp:LinkButton ID="ClearServiceDetailPartButton" runat="server" CommandName="Cancel"
+                                                                    CssClass="btn btn-link btn-sm text-decoration-none text-secondary" ToolTip="Discard Changes" CausesValidation="false">
+                                                                    <i class="bi bi-x-circle-fill h6"></i>
                                                                 </asp:LinkButton>
                                                             </td>
                                                         </tr>
                                                     </EditItemTemplate>
                                                     <InsertItemTemplate>
                                                         <tr class="table-active bg-transparent text-center">
-                                                            <td class="align-middle" style="min-width:4rem;" colspan="2">
+                                                            <td class="align-top" style="min-width:4rem;" colspan="2">
                                                                 <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" Visible="false" />
                                                                 <asp:Label Text='<%# Bind("ServiceDetailPartID") %>' runat="server" ID="ServiceDetailPartIDLabel" Visible="false"/>
-                                                                <asp:TextBox Text='<%# Bind("PartID") %>' runat="server" ID="PartIDTextBox" CssClass="form-control" placeholder="Enter Part #"/>
+                                                                <asp:TextBox Text='<%# Bind("PartID") %>' runat="server" ID="PartIDTextBox" CssClass="form-control" placeholder="Part #"/>
+                                                                <small>
+                                                                    <asp:RequiredFieldValidator ErrorMessage="Part number is required." ControlToValidate="PartIDTextBox" runat="server"
+                                                                        CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic" SetFocusOnError="true" />
+                                                                </small>
                                                                 <asp:Label Text='<%# Bind("PartDescription") %>' runat="server" ID="PartDescriptionLabel" Visible="false"/></td>
+                                                            <td class="align-top">
+                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"/>
+                                                                <small>
+                                                                    <asp:RequiredFieldValidator ErrorMessage="Quantity is required." ControlToValidate="QuantityTextBox" runat="server"
+                                                                        CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                                                </small>
+                                                            </td>
                                                             <td class="align-middle">
-                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"/></td>
-                                                            <td class="align-middle">
-                                                                    <asp:LinkButton ID="AddServiceDetailPartButton" runat="server" CommandName="Insert" CssClass="btn btn-link btn-sm text-decoration-none text-success p-0" ToolTip="Add Part">
-                                                                        <i class="bi bi-plus-circle-fill h5"></i>
-                                                                    </asp:LinkButton>
-                                                                    <asp:LinkButton ID="ClearServiceDetailPartButton" runat="server" CommandName="Cancel" CssClass="btn btn-link btn-sm text-decoration-none text-secondary p-0" ToolTip="Clear Quantity">
-                                                                        <i class="bi bi-backspace-fill h5"></i>
-                                                                    </asp:LinkButton></td>
+                                                                <asp:LinkButton ID="AddServiceDetailPartButton" runat="server" CommandName="Insert"
+                                                                    CssClass="btn btn-link btn-sm text-decoration-none text-success p-0" ToolTip="Add Part" CausesValidation="true"
+                                                                    ValidationGroup="InsertServiceDetailPartGroup" >
+                                                                    <i class="bi bi-plus-circle-fill h5"></i>
+                                                                </asp:LinkButton>
+                                                                <asp:LinkButton ID="ClearServiceDetailPartButton" runat="server" CommandName="Cancel"
+                                                                    CssClass="btn btn-link btn-sm text-decoration-none text-secondary p-0" ToolTip="Clear Quantity" CausesValidation="false">
+                                                                    <i class="bi bi-backspace-fill h5"></i>
+                                                                </asp:LinkButton></td>
                                                         </tr>
                                                     </InsertItemTemplate>
                                                 </asp:ListView>

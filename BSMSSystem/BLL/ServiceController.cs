@@ -136,6 +136,49 @@ namespace BSMSSystem.BLL
         }
 
         [DataObjectMethod(DataObjectMethodType.Select, false)]
+        public bool? Validate_Part(int partId, short quantity)
+        {
+            using (var context = new BSMSContext())
+            {
+                var part = (from x in context.Parts
+                              where x.PartID == partId
+                              select x).FirstOrDefault();
+                var partValidQuantity = (from x in context.Parts
+                              where x.PartID == partId && x.QuantityOnHand >= quantity
+                              select x).FirstOrDefault();
+                bool? valid;
+
+                if (part == null)
+                {
+                    valid = null;
+                }
+                else if (part != null && partValidQuantity == null)
+                {
+                    valid = false;
+                }
+                else
+                {
+                    valid = true;
+                }
+
+                return valid;
+            }
+        }
+
+        [DataObjectMethod(DataObjectMethodType.Select, false)]
+        public Part Lookup_Part(int partId)
+        {
+            using (var context = new BSMSContext())
+            {
+                Part part = (from x in context.Parts
+                              where x.PartID == partId
+                              select x).FirstOrDefault();
+
+                return part;
+            }
+        }
+
+        [DataObjectMethod(DataObjectMethodType.Select, false)]
         public List<ServiceDetailPartPOCO> List_ServiceDetailParts(int serviceDetailId)
         {
             using (var context = new BSMSContext())
@@ -181,23 +224,32 @@ namespace BSMSSystem.BLL
         {
             using (var context = new BSMSContext())
             {
-                var exists = (from x in context.JobDetailParts
+                JobDetailPart existingServiceDetailPart = (from x in context.JobDetailParts
                               where x.JobDetailID == serviceDetailId && x.PartID == partId
                               select x).FirstOrDefault();
+                Part inventoryPart = (from x in context.Parts
+                              where x.PartID == partId
+                              select x).FirstOrDefault();
 
-                if (exists == null)
+                if (existingServiceDetailPart == null)
                 {
                     //proceed to adding the new Service Detail Part since there's no existing part under the ServiceDetail
-                    exists = new JobDetailPart();
-                    exists.JobDetailID = serviceDetailId;
-                    exists.PartID = partId;
-                    exists.Quantity = quantity;
-                    context.JobDetailParts.Add(exists);
+                    existingServiceDetailPart = new JobDetailPart();
+                    existingServiceDetailPart.JobDetailID = serviceDetailId;
+                    existingServiceDetailPart.PartID = partId;
+                    existingServiceDetailPart.Quantity = quantity;
+                    context.JobDetailParts.Add(existingServiceDetailPart);
+                    //make the necessary update on the Parts Entity
+                    inventoryPart.QuantityOnHand -= quantity;
+                    context.Entry(inventoryPart).State = System.Data.Entity.EntityState.Modified;
                 }
                 else
                 {
                     //update just the quantity
-                    exists.Quantity += quantity;
+                    existingServiceDetailPart.Quantity += quantity;
+                    //make the necessary update on the Parts Entity
+                    inventoryPart.QuantityOnHand -= quantity;
+                    context.Entry(inventoryPart).State = System.Data.Entity.EntityState.Modified;
                 }
 
                 context.SaveChanges();
@@ -209,10 +261,20 @@ namespace BSMSSystem.BLL
         {
             using (var context = new BSMSContext())
             {
-                JobDetailPart seviceDetailPart = (from x in context.JobDetailParts
+                JobDetailPart serviceDetailPart = (from x in context.JobDetailParts
                                                   where x.JobDetailPartID == serviceDetailPartID
                                                   select x).FirstOrDefault();
-                context.JobDetailParts.Remove(seviceDetailPart);
+                int partId = serviceDetailPart.PartID;
+                short quantity = serviceDetailPart.Quantity;
+                Part inventoryPart = (from y in context.Parts
+                                      where y.PartID == partId
+                                      select y).FirstOrDefault();
+
+                //make the necessary update on the Parts Entity
+                inventoryPart.QuantityOnHand += quantity;
+                context.Entry(inventoryPart).State = System.Data.Entity.EntityState.Modified;
+
+                context.JobDetailParts.Remove(serviceDetailPart);
                 context.SaveChanges();
             }
         }
@@ -330,7 +392,7 @@ namespace BSMSSystem.BLL
                                          where x.JobDetailPartID == serviceDetailPartId
                                          select x).FirstOrDefault();
 
-                //update service detail status
+                //update service detail part quantity
                 serviceDetailPart.Quantity = quantity;
 
                 //save changes to the database

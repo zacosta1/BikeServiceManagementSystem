@@ -15,6 +15,7 @@ namespace BSMSData.Entities
             Sales = new HashSet<Sale>();
         }
 
+        [Required]
         public int JobID { get; set; }
 
         public DateTime JobDateIn { get; set; }
@@ -25,6 +26,7 @@ namespace BSMSData.Entities
 
         public DateTime? JobDateOut { get; set; }
 
+        [Required]
         public int CustomerID { get; set; }
 
         public int EmployeeID { get; set; }
@@ -36,7 +38,7 @@ namespace BSMSData.Entities
         public string StatusCode { get; set; }
 
         [Required]
-        [StringLength(50)]
+        [StringLength(50,ErrorMessage = "The provided vehicle identitfication number or model description exceeded the 50-character limit.")]
         public string VehicleIdentification { get; set; }
 
         public virtual Customer Customer { get; set; }

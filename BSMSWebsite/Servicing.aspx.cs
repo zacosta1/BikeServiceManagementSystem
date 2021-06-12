@@ -66,77 +66,74 @@ public partial class Servicing : System.Web.UI.Page
         NewServiceModalServiceDetailHoursTextBox.Text = null;
         NewServiceModalCouponDropDownList.SelectedIndex = 0;
         NewServiceModalServiceDetailCommentsTextBox = null;
+
+        //reset textbox styling if style was changed due to invalid data entry
+        ServiceVehicleIdentificationTextBox.CssClass = "form-control";
+        NewServiceModalServiceDetailDescriptionTextBox.CssClass = "form-control";
     }
 
     protected void AddNewServiceButton_Click(object sender, EventArgs e)
     {
-        //check if a customer has been selected
-        if (CustomerDropDownList.SelectedValue == "0")
+        //at this point, client-side validation either passed or is compromised through html editing (string length html attribute can be modified through browser's inspect tool).
+        //validate string length and post-back message user control showing errors in the form.
+        if (ServiceVehicleIdentificationTextBox.Text.Length > 50)
         {
-            MessageUserControl.ShowValidationError("Missing information", "Please select a customer.");
-            CustomerDropDownList.Focus();
+            MessageUserControl.ShowValidationError("Character limit exceeded.", "The provided vehicle identitfication number or model description exceeded the 50-character limit.");
+            MessageUserControl.Visible = true;
+            ServiceVehicleIdentificationTextBox.CssClass = "form-control is-invalid";
+        }
+        else if (NewServiceModalServiceDetailDescriptionTextBox.Text.Length > 100)
+        {
+            MessageUserControl.ShowValidationError("Character limit exceeded.", "The provided service detail description exceeded the 100-character limit.");
+            MessageUserControl.Visible = true;
+            NewServiceModalServiceDetailDescriptionTextBox.CssClass = "form-control is-invalid";
         }
         else
         {
-            if (string.IsNullOrWhiteSpace(ServiceVehicleIdentificationTextBox.Text))
+            MessageUserControl.Visible = true;
+            MessageUserControl.TryRun(() =>
             {
-                MessageUserControl.ShowValidationError("Missing information", "Please provide the vehicle's identitfication number, model name, or model number.");
-            }
-            else if (string.IsNullOrWhiteSpace(NewServiceModalServiceDetailDescriptionTextBox.Text))
-            {
-                MessageUserControl.ShowValidationError("Missing information", "Please provide a description for this service.");
-            }
-            else if (string.IsNullOrEmpty(NewServiceModalServiceDetailHoursTextBox.Text))
-            {
-                MessageUserControl.ShowValidationError("Missing information", "Please indicate how many hours this service will take.");
-            }
-            else
-            {
-                MessageUserControl.Visible = true;
-                MessageUserControl.TryRun(() =>
+                Job newService = new Job();
+                newService.JobDateIn = DateTime.Now;
+                //get customer ID from dropdown list
+                newService.CustomerID = int.Parse(CustomerDropDownList.SelectedValue);
+
+                //get the mechanic's details
+                var usermgr = new UserManager();
+                newService.EmployeeID = usermgr.Get_EmployeeID(User.Identity.Name);
+                newService.ShopRate = 50;
+                newService.StatusCode = "I";
+                newService.VehicleIdentification = ServiceVehicleIdentificationTextBox.Text;
+
+                //add the first service detail of the service
+                JobDetail newServiceDetail = new JobDetail();
+                newServiceDetail.JobID = newService.JobID;
+                newServiceDetail.Description = NewServiceModalServiceDetailDescriptionTextBox.Text;
+                if (NewServiceModalCouponDropDownList.SelectedValue == "0")
                 {
-                    Job newService = new Job();
-                    newService.JobDateIn = DateTime.Now;
-                    //get customer ID from dropdown list
-                    newService.CustomerID = int.Parse(CustomerDropDownList.SelectedValue);
+                    newServiceDetail.CouponID = null;
+                }
+                else
+                {
+                    newServiceDetail.CouponID = int.Parse(NewServiceModalCouponDropDownList.SelectedValue);
+                }
+                newServiceDetail.JobHours = decimal.Parse(NewServiceModalServiceDetailHoursTextBox.Text);
+                newServiceDetail.Comments = NewServiceModalServiceDetailCommentsTextBox.InnerText;
 
-                    //get the mechanic's details
-                    var usermgr = new UserManager();
-                    newService.EmployeeID = usermgr.Get_EmployeeID(User.Identity.Name);
-                    newService.ShopRate = 50;
-                    newService.StatusCode = "I";
-                    newService.VehicleIdentification = ServiceVehicleIdentificationTextBox.Text;
+                //add the new service to the database
+                ServiceController sysmgr = new ServiceController();
+                sysmgr.Add_Service(newService, newServiceDetail);
+                //refresh Listview
+                ServicesListView.DataBind();
 
-                    //add the first service detail of the service
-                    JobDetail newServiceDetail = new JobDetail();
-                    newServiceDetail.JobID = newService.JobID;
-                    newServiceDetail.Description = NewServiceModalServiceDetailDescriptionTextBox.Text;
-                    if (NewServiceModalCouponDropDownList.SelectedValue == "0")
-                    {
-                        newServiceDetail.CouponID = null;
-                    }
-                    else
-                    {
-                        newServiceDetail.CouponID = int.Parse(NewServiceModalCouponDropDownList.SelectedValue);
-                    }
-                    newServiceDetail.JobHours = decimal.Parse(NewServiceModalServiceDetailHoursTextBox.Text);
-                    newServiceDetail.Comments = NewServiceModalServiceDetailCommentsTextBox.InnerText;
+                //select the newly added service by selecting the last record in the ListView
+                ServicesListView.SelectedIndex = ServicesListView.Items.Count - 1;
+                ServicesListView_SelectedIndexChanged(sender, e);
 
-                    //add the new service to the database
-                    ServiceController sysmgr = new ServiceController();
-                    sysmgr.Add_Service(newService, newServiceDetail);
-                    //refresh Listview
-                    ServicesListView.DataBind();
+                //clear form fields
+                Clear_AddNewServicesForm();
 
-                    //select the newly added service by selecting the last record in the ListView
-                    ServicesListView.SelectedIndex = ServicesListView.Items.Count - 1;
-                    ServicesListView_SelectedIndexChanged(sender, e);
-
-                    //clear form fields
-                    Clear_AddNewServicesForm();
-
-                }, "Success", "New service added and selected.");
-            }
+            }, "Success", "New service added and is currently selected to be managed.");
         }
     }
     #endregion
@@ -161,12 +158,20 @@ public partial class Servicing : System.Web.UI.Page
         List<ServiceDetailPOCO> serviceDetailList = sysmgr.List_ServiceDetails(serviceId);
         ServiceDetailsListView.DataSource = serviceDetailList;
         ServiceDetailsListView.DataBind();
+
+        ServicesListViewTitle.Text = "Service #" + serviceId + " Information";
+        ServicesListViewSubtitle.Text = "View service #" + serviceId + " information and manage service details. Deselect service to return to current services list.";
+        AddNewServiceModalButtonPanel.Visible = false;
     }
 
     protected void DeselectServiceButton_Click(object sender, EventArgs e)
     {
         //deselect currently selected item
         ServicesListView.SelectedIndex = -1;
+
+        ServicesListViewTitle.Text = "Current Services";
+        ServicesListViewSubtitle.Text = "Select a service to view or manage.";
+        AddNewServiceModalButtonPanel.Visible = true;
 
         ResetServiceDetailsListView();
     }
@@ -289,7 +294,7 @@ public partial class Servicing : System.Web.UI.Page
 
         ListViewItem serviceDetailRow = ServiceDetailsListView.EditItem;
 
-        var commentsTB = serviceDetailRow.FindControl("ServiceDetailCommentsTextArea");
+        HtmlTextArea commentsTB = serviceDetailRow.FindControl("ServiceDetailCommentsTextArea") as HtmlTextArea;
         commentsTB.Focus();
 
         ServiceDetailPartsListView.DataSource = null;
@@ -317,6 +322,13 @@ public partial class Servicing : System.Web.UI.Page
 
         ServiceDetailPartsListView.DataSource = null;
         ServiceDetailPartsListView.DataBind();
+    }
+
+    protected void ClearServiceDetailInsertRowButton_Click(object sender, EventArgs e)
+    {
+        ListViewItem insertRow = ServiceDetailsListView.InsertItem;
+        TextBox serviceDetailDescriptionTb = insertRow.FindControl("InsertRowServiceDetailDescriptionTextBox") as TextBox;
+        serviceDetailDescriptionTb.Focus();
     }
 
     protected void ServiceDetailsListView_ItemCommand(object sender, ListViewCommandEventArgs e)
@@ -534,25 +546,55 @@ public partial class Servicing : System.Web.UI.Page
     {
         //get Service detail ID from currently-selected service detail
         ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
-        int serviceDetailID = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+        int serviceDetailID = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
+        string serviceDescription = (selectedServiceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
 
         //fetch input in the CurrentServiceDetailPartsListView insert row
         ListViewItem serviceDetailPartInsertRow = e.Item;
-        int insertPartID = int.Parse((serviceDetailPartInsertRow.FindControl("PartIDTextBox") as TextBox).Text);
-        short insertQuantity = short.Parse((serviceDetailPartInsertRow.FindControl("QuantityTextBox") as TextBox).Text);
+        TextBox insertPartIdTb = serviceDetailPartInsertRow.FindControl("PartIDTextBox") as TextBox;
+        TextBox insertQuantityTb = serviceDetailPartInsertRow.FindControl("QuantityTextBox") as TextBox;
+        int insertPartID = int.Parse(insertPartIdTb.Text.Trim());
+        short insertQuantity = short.Parse(insertQuantityTb.Text.Trim());
+
+        //validate if the entered part exists
+        ServiceController sysmgr = new ServiceController();
+        bool? insertingPartIsValid = sysmgr.Validate_Part(insertPartID, insertQuantity);
 
         MessageUserControl.Visible = true;
-        MessageUserControl.TryRun(() =>
+
+        if (insertingPartIsValid == null)
         {
-            ServiceController sysmgr = new ServiceController();
-            sysmgr.Add_ServiceDetailPart(serviceDetailID, insertPartID, insertQuantity);
+            MessageUserControl.ShowValidationError("Invalid Part Number", "Provided part number " + insertPartID + " was not found or does not exist in the parts inventory.");
+            insertPartIdTb.Focus();
+            insertPartIdTb.CssClass = "form-control is-invalid";
+        }
+        else if (insertingPartIsValid == false)
+        {
+            Part foundPart = sysmgr.Lookup_Part(insertPartID);
+            string foundPartDescription = foundPart.Description;
+            int quantityOnHand = foundPart.QuantityOnHand;
+            MessageUserControl.ShowValidationError("Invalid Quantity", "Not enough " + foundPartDescription + " in stock. Quantity must be " + quantityOnHand + " or less.");
+            insertQuantityTb.Focus();
+            insertQuantityTb.CssClass = "form-control is-invalid";
+        }
+        else
+        {
+            Part foundPart = sysmgr.Lookup_Part(insertPartID);
+            string foundPartDescription = foundPart.Description;
+            int quantityOnHand = foundPart.QuantityOnHand;
 
-            //refresh Service Detail Parts ListView
-            List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(serviceDetailID);
-            ServiceDetailPartsListView.DataSource = serviceDetailPartsList;
-            ServiceDetailPartsListView.DataBind();
+            MessageUserControl.TryRun(() =>
+            {
+                sysmgr.Add_ServiceDetailPart(serviceDetailID, insertPartID, insertQuantity);
 
-        }, "Service Detail Part added", "Part #" + insertPartID + " has been added to the selected service detail");
+                //refresh Service Detail Parts ListView
+                List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(serviceDetailID);
+                ServiceDetailPartsListView.DataSource = serviceDetailPartsList;
+                ServiceDetailPartsListView.DataBind();
+                insertPartIdTb.Focus();
+
+            }, "Service Detail Part added", foundPartDescription + " has been added to the "+ serviceDescription + " service.");
+        }
 
         ServiceDetailsPanel.Visible = true;
         ServiceDetailPartsPanel.Visible = true;
@@ -668,6 +710,4 @@ public partial class Servicing : System.Web.UI.Page
         }, "Service Detail Part Removed", "Service detail part has been removed from current service detail.");
     }
     #endregion
-
-    
 }
