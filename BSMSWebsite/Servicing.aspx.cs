@@ -547,7 +547,7 @@ public partial class Servicing : System.Web.UI.Page
         //get Service detail ID from currently-selected service detail
         ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
         int serviceDetailID = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
-        string serviceDescription = (selectedServiceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
+        string serviceDetailDescription = (selectedServiceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
 
         //fetch input in the CurrentServiceDetailPartsListView insert row
         ListViewItem serviceDetailPartInsertRow = e.Item;
@@ -577,7 +577,7 @@ public partial class Servicing : System.Web.UI.Page
             insertQuantityTb.Focus();
             insertQuantityTb.CssClass = "form-control is-invalid";
         }
-        else
+        else if (insertingPartIsValid == true)
         {
             Part foundPart = sysmgr.Lookup_Part(insertPartID);
             string foundPartDescription = foundPart.Description;
@@ -593,7 +593,7 @@ public partial class Servicing : System.Web.UI.Page
                 ServiceDetailPartsListView.DataBind();
                 insertPartIdTb.Focus();
 
-            }, "Service Detail Part added", foundPartDescription + " has been added to the "+ serviceDescription + " service.");
+            }, "Service Detail Part added", foundPartDescription + " has been added to the "+ serviceDetailDescription + " service.");
         }
 
         ServiceDetailsPanel.Visible = true;
@@ -626,26 +626,50 @@ public partial class Servicing : System.Web.UI.Page
         ServiceDetailsPanel.Visible = true;
         ServiceDetailPartsPanel.Visible = true;
 
-        //ListViewItem editRow = ServiceDetailPartsListView.Items[e.ItemIndex];
-        ListViewItem editRow = ServiceDetailPartsListView.EditItem;
+        //get Service Detail ID and description from currently-selected service detail
+        ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
+        int serviceDetailID = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
+        string serviceDetailDescription = (selectedServiceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
 
-        int serviceDetailPartId = int.Parse((editRow.FindControl("ServiceDetailPartIDLabel") as Label).Text);
-        int serviceDetailId = int.Parse((editRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-        short newQuantity = short.Parse((editRow.FindControl("QuantityTextBox") as TextBox).Text);
+        //fetch edit row input
+        ListViewItem editRow = ServiceDetailPartsListView.EditItem;
+        TextBox editPartQuantityTb = editRow.FindControl("QuantityTextBox") as TextBox;
+
+        int serviceDetailPartId = int.Parse((editRow.FindControl("ServiceDetailPartIDLabel") as Label).Text.Trim());
+        short newQuantity = short.Parse(editPartQuantityTb.Text.Trim());
+        int inventoryPartId = short.Parse((editRow.FindControl("PartIDLabel") as Label).Text.Trim());
+
+        //validate if the entered part exists
+        ServiceController sysmgr = new ServiceController();
+        bool newQuantityIsValid = sysmgr.Validate_Part_Quantity(serviceDetailPartId, inventoryPartId, newQuantity);
 
         MessageUserControl.Visible = true;
-        MessageUserControl.TryRun(() =>
+        if (newQuantityIsValid == false)
         {
-            ServiceController sysmgr = new ServiceController();
-            sysmgr.Update_ServiceDetailPart_Quantity(serviceDetailPartId, newQuantity);
+            Part foundPart = sysmgr.Lookup_Part(inventoryPartId);
+            string foundPartDescription = foundPart.Description;
+            int quantityOnOrder = foundPart.QuantityOnOrder;
+            MessageUserControl.ShowValidationError("Invalid Quantity", "Not enough " + foundPartDescription + " left in stock for the " + serviceDetailDescription + " service to use. " + quantityOnOrder + " " + foundPartDescription + " are currently on order.");
+            editPartQuantityTb.CssClass = "form-control is-invalid";
+            editPartQuantityTb.Focus();
+        }
+        else
+        {
+            Part foundPart = sysmgr.Lookup_Part(inventoryPartId);
+            string foundPartDescription = foundPart.Description;
+            int quantityOnHand = foundPart.QuantityOnHand;
+            MessageUserControl.TryRun(() =>
+            {
+                sysmgr.Update_ServiceDetailPart_Quantity(serviceDetailPartId, newQuantity);
 
-            //refresh current service detail parts list
-            List<ServiceDetailPartPOCO> serviceDetailPartsResults = sysmgr.List_ServiceDetailParts(serviceDetailId);
+                //refresh current service detail parts list
+                List<ServiceDetailPartPOCO> serviceDetailPartsResults = sysmgr.List_ServiceDetailParts(serviceDetailID);
 
-            ServiceDetailPartsListView.DataSource = serviceDetailPartsResults;
-            ServiceDetailPartsListView.EditIndex = -1;
-            ServiceDetailPartsListView.DataBind();
-        }, "Success", "Quantity updated.");
+                ServiceDetailPartsListView.DataSource = serviceDetailPartsResults;
+                ServiceDetailPartsListView.EditIndex = -1;
+                ServiceDetailPartsListView.DataBind();
+            }, "Quantity Updated", "Quantity of " + foundPartDescription + " in the " + serviceDetailDescription + " service has been updated.");
+        }
     }
 
     protected void ServiceDetailPartsListView_ItemCanceling(object sender, ListViewCancelEventArgs e)

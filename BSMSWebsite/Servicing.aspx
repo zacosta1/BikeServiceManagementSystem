@@ -522,19 +522,26 @@
                                                             <td class="align-middle" style="min-width:4rem;">
                                                                 <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" Visible="false" />
                                                                 <asp:Label Text='<%# Bind("ServiceDetailPartID") %>' runat="server" ID="ServiceDetailPartIDLabel" Visible="false" />
-                                                                <asp:Label Text='<%# Bind("PartID") %>' runat="server" ID="PartIDTextBox"/></td>
+                                                                <asp:Label Text='<%# Bind("PartID") %>' runat="server" ID="PartIDLabel"/></td>
                                                             <td class="align-middle">
                                                                 <asp:Label Text='<%# Bind("PartDescription") %>' runat="server" ID="PartDescriptionLabel" /></td>
                                                             <td class="align-middle">
-                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"/></td>
+                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"/>
+                                                                <small>
+                                                                    <asp:CompareValidator ErrorMessage="Quantity must not be less than or equal to zero." ControlToValidate="QuantityTextBox"
+                                                                        runat="server" CssClass="text-danger" ValidationGroup="EditPartQuantityGroup" Display="Dynamic" SetFocusOnError ="true"
+                                                                        Operator="GreaterThan" ValueToCompare="0" />
+                                                                </small>
+                                                            </td>
                                                             <td class="align-middle">
                                                                 <asp:LinkButton ID="AddServiceDetailPartButton" runat="server" CommandName="Update"
-                                                                    CssClass="btn btn-link btn-sm text-decoration-none text-success" ToolTip="Save Changes" CausesValidation="false">
-                                                                   <i class="bi bi-check-circle-fill h6"></i>
+                                                                    CssClass="btn btn-link btn-sm text-decoration-none text-success" ToolTip="Save Changes" CausesValidation="true"
+                                                                    ValidationGroup="EditPartQuantityGroup" >
+                                                                   <i class="bi bi-check-circle-fill h5"></i>
                                                                 </asp:LinkButton>
                                                                 <asp:LinkButton ID="ClearServiceDetailPartButton" runat="server" CommandName="Cancel"
                                                                     CssClass="btn btn-link btn-sm text-decoration-none text-secondary" ToolTip="Discard Changes" CausesValidation="false">
-                                                                    <i class="bi bi-x-circle-fill h6"></i>
+                                                                    <i class="bi bi-x-circle-fill h5"></i>
                                                                 </asp:LinkButton>
                                                             </td>
                                                         </tr>
@@ -555,6 +562,9 @@
                                                                 <small>
                                                                     <asp:RequiredFieldValidator ErrorMessage="Quantity is required." ControlToValidate="QuantityTextBox" runat="server"
                                                                         CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                                                    <asp:CompareValidator ErrorMessage="Quantity must not be less than or equal to zero." ControlToValidate="QuantityTextBox"
+                                                                        runat="server" CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic" SetFocusOnError ="true"
+                                                                        Operator="GreaterThan" ValueToCompare="0" />
                                                                 </small>
                                                             </td>
                                                             <td class="align-middle">
@@ -564,7 +574,7 @@
                                                                     <i class="bi bi-plus-circle-fill h5"></i>
                                                                 </asp:LinkButton>
                                                                 <asp:LinkButton ID="ClearServiceDetailPartButton" runat="server" CommandName="Cancel"
-                                                                    CssClass="btn btn-link btn-sm text-decoration-none text-secondary p-0" ToolTip="Clear Quantity" CausesValidation="false">
+                                                                    CssClass="btn btn-link btn-sm text-decoration-none text-secondary p-0" ToolTip="Clear Insert Part Row" CausesValidation="false">
                                                                     <i class="bi bi-backspace-fill h5"></i>
                                                                 </asp:LinkButton></td>
                                                         </tr>
