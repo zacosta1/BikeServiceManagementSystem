@@ -435,8 +435,7 @@
                                                     <i class="bi bi-plus-circle-fill h4"></i>
                                                 </asp:LinkButton>
                                                 <asp:LinkButton ID="ClearServiceDetailInsertRowButton" runat="server" CommandName="Cancel" Text="Clear"
-                                                    CssClass="btn btn-link text-decoration-none text-secondary p-0" ToolTip="Clear" CausesValidation="false"
-                                                    OnClick="ClearServiceDetailInsertRowButton_Click">
+                                                    CssClass="btn btn-link text-decoration-none text-secondary p-0" ToolTip="Clear" CausesValidation="false" >
                                                     <i class="bi bi-backspace-fill h4"></i>
                                                 </asp:LinkButton>
                                             </td>

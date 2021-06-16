@@ -76,13 +76,13 @@ public partial class Servicing : System.Web.UI.Page
     {
         //at this point, client-side validation either passed or is compromised through html editing (string length html attribute can be modified through browser's inspect tool).
         //validate string length and post-back message user control showing errors in the form.
-        if (ServiceVehicleIdentificationTextBox.Text.Length > 50)
+        if (ServiceVehicleIdentificationTextBox.Text.Trim().Length > 50)
         {
             MessageUserControl.ShowValidationError("Character limit exceeded.", "The provided vehicle identitfication number or model description exceeded the 50-character limit.");
             MessageUserControl.Visible = true;
             ServiceVehicleIdentificationTextBox.CssClass = "form-control is-invalid";
         }
-        else if (NewServiceModalServiceDetailDescriptionTextBox.Text.Length > 100)
+        else if (NewServiceModalServiceDetailDescriptionTextBox.Text.Trim().Length > 100)
         {
             MessageUserControl.ShowValidationError("Character limit exceeded.", "The provided service detail description exceeded the 100-character limit.");
             MessageUserControl.Visible = true;
@@ -254,10 +254,7 @@ public partial class Servicing : System.Web.UI.Page
 
     protected void ServiceDetailsListView_SelectedIndexChanging(object sender, ListViewSelectEventArgs e)
     {
-        ResetServiceDetailsListView();
         ServiceDetailsListView.SelectedIndex = e.NewSelectedIndex;
-        ServiceDetailsPanel.Visible = true;
-        ServiceDetailPartsPanel.Visible = true;
 
         ListViewItem serviceRow = ServicesListView.Items[ServicesListView.SelectedIndex];
         int serviceId = int.Parse((serviceRow.FindControl("ServiceIDLabel") as Label).Text);
@@ -275,6 +272,7 @@ public partial class Servicing : System.Web.UI.Page
         SelectedServiceDetailDescriptionLabel.Text = selectedServiceDetailDescription;
         SelectedServiceDetailDescriptionLabel2.Text = selectedServiceDetailDescription;
 
+        ServiceDetailPartsPanel.Visible = true;
         ServiceDetailPartsListView.InsertItemPosition = (InsertItemPosition)2;
         ServiceDetailPartsListView.DataSource = serviceDetailPartsList;
         ServiceDetailPartsListView.DataBind();
@@ -304,11 +302,38 @@ public partial class Servicing : System.Web.UI.Page
     protected void ServiceDetailsListView_ItemCanceling(object sender, ListViewCancelEventArgs e)
     {
         ResetServiceDetailsListView();
-        DeselectServiceDetailButton_Click(sender, e);
+        ServiceDetailsPanel.Visible = true;
+
+        ListViewItem serviceRow = ServicesListView.Items[ServicesListView.SelectedIndex];
+        int serviceId = int.Parse((serviceRow.FindControl("ServiceIDLabel") as Label).Text);
+        ServiceController sysmgr = new ServiceController();
+        List<ServiceDetailPOCO> serviceDetailList = sysmgr.List_ServiceDetails(serviceId);
+        ServiceDetailsListView.DataSource = serviceDetailList;
+
+        //if cancelling edit-mode
+        if (ServicesListView.EditIndex != -1)
+        {
+            ServiceDetailsListView.EditIndex = -1;
+            ServiceDetailsListView.DataBind();
+        }
+        //else clear insert row
+        else
+        {
+            ServiceDetailsListView.DataBind();
+            ListViewItem insertRow = ServiceDetailsListView.InsertItem;
+            TextBox serviceDetailDescriptionTb = insertRow.FindControl("InsertRowServiceDetailDescriptionTextBox") as TextBox;
+            serviceDetailDescriptionTb.Focus();
+        }
+
+        ServiceDetailsListView.InsertItemPosition = (InsertItemPosition)2;
+
+        ServiceDetailPartsListView.DataSource = null;
+        ServiceDetailPartsListView.DataBind();
     }
 
     protected void DeselectServiceDetailButton_Click(object sender, EventArgs e)
     {
+        ResetServiceDetailsListView();
         ServiceDetailsPanel.Visible = true;
 
         ListViewItem serviceRow = ServicesListView.Items[ServicesListView.SelectedIndex];
@@ -324,18 +349,11 @@ public partial class Servicing : System.Web.UI.Page
         ServiceDetailPartsListView.DataBind();
     }
 
-    protected void ClearServiceDetailInsertRowButton_Click(object sender, EventArgs e)
-    {
-        ListViewItem insertRow = ServiceDetailsListView.InsertItem;
-        TextBox serviceDetailDescriptionTb = insertRow.FindControl("InsertRowServiceDetailDescriptionTextBox") as TextBox;
-        serviceDetailDescriptionTb.Focus();
-    }
-
     protected void ServiceDetailsListView_ItemCommand(object sender, ListViewCommandEventArgs e)
     {
         int i = e.Item.DisplayIndex;
 
-        if ((e.CommandName.Equals("Edit")) || (e.CommandName.Equals("Select")))
+        if (e.CommandName.Equals("Edit") || e.CommandName.Equals("Select"))
         {
             ServiceDetailsListView.InsertItemPosition = 0;
             ServiceDetailsPanel.Visible = true;
@@ -471,7 +489,6 @@ public partial class Servicing : System.Web.UI.Page
 
             HtmlTextArea commentsTextArea = insertServiceDetailRow.FindControl("ServiceDetailCommentsTextArea") as HtmlTextArea;
             string comments = commentsTextArea.InnerText.Trim();
-            //string comments = (insertServiceDetailRow.FindControl("InsertRowServiceDetailCommentsTextBox") as TextBox).Text.Trim();
 
             //add the service detail to the selected service
             JobDetail newServiceDetail = new JobDetail();
@@ -492,6 +509,7 @@ public partial class Servicing : System.Web.UI.Page
             ServiceController sysmgr = new ServiceController();
             sysmgr.Add_ServiceDetail(newServiceDetail);
             //refresh Listview
+            ServicesListView.DataBind();
             ServicesListView_SelectedIndexChanged(sender, e);
 
             //clear form fields

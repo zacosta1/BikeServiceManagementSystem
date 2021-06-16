@@ -142,6 +142,25 @@ namespace BSMSSystem.BLL
         {
             using (var context = new BSMSContext())
             {
+                int serviceId = serviceDetail.JobID;
+                var service = (from x in context.Jobs
+                               where x.JobID == serviceId
+                               select x).FirstOrDefault();
+                int serviceDetailCount = (from x in context.JobDetails
+                                          where x.JobID == serviceId
+                                          select x).Count();
+                int finishedServiceDetailCount = (from x in context.JobDetails
+                                                  where x.JobID == serviceId && x.Completed == true
+                                                  select x).Count();
+
+                //check if all service details were done, but then a new service detail is just about to be added
+                if (serviceDetailCount == finishedServiceDetailCount)
+                {
+                    service.JobDateDone = null;
+                }
+                //save changes to database
+                context.Entry(service).State = System.Data.Entity.EntityState.Modified;
+                //add new job detail
                 context.JobDetails.Add(serviceDetail);
                 context.SaveChanges();
             }
@@ -217,18 +236,18 @@ namespace BSMSSystem.BLL
                 var serviceDetail = (from x in context.JobDetails
                                where x.JobID == serviceId && x.JobDetailID == serviceDetailId
                                select x).FirstOrDefault();
+                int serviceDetailCount = (from x in context.JobDetails
+                                          where x.JobID == serviceId
+                                          select x).Count();
                 int startedServiceDetailCount = (from x in context.JobDetails
                                              where x.JobID == serviceId && x.Completed == false
                                              select x).Count();
-                int serviceDetailCount = (from x in context.JobDetails
-                                                 where x.JobID == serviceId
-                                                 select x).Count();
                 int finishedServiceDetailCount = (from x in context.JobDetails
                                                  where x.JobID == serviceId && x.Completed == true
                                                  select x).Count();
 
                 //check if service is starting its first service detail
-                if (newStatus == false && startedServiceDetailCount == 0)
+                if (newStatus == false && startedServiceDetailCount == 0 && finishedServiceDetailCount == 0)
                 {
                     //update service start date
                     service.JobDateStarted = DateTime.Now;
