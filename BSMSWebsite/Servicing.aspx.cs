@@ -460,6 +460,8 @@ public partial class Servicing : System.Web.UI.Page
                 sysmgr.Delete_ServiceDetail(serviceDetailId);
 
                 Clear_AddNewServicesForm();
+                //refresh Listview
+                ServicesListView.DataBind();
 
                 //refresh current service details list
                 ServiceDetailsListView.DataSource = sysmgr.List_ServiceDetails(serviceId);

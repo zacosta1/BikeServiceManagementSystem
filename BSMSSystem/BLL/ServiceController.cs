@@ -157,9 +157,9 @@ namespace BSMSSystem.BLL
                 if (serviceDetailCount == finishedServiceDetailCount)
                 {
                     service.JobDateDone = null;
+                    //save changes to database
+                    context.Entry(service).State = System.Data.Entity.EntityState.Modified;
                 }
-                //save changes to database
-                context.Entry(service).State = System.Data.Entity.EntityState.Modified;
                 //add new job detail
                 context.JobDetails.Add(serviceDetail);
                 context.SaveChanges();
@@ -177,6 +177,22 @@ namespace BSMSSystem.BLL
                 JobDetail serviceDetail = (from x in context.JobDetails
                                            where x.JobDetailID == serviceDetailID
                                            select x).FirstOrDefault();
+                int serviceId = serviceDetail.JobID;
+                Job service = serviceDetail.Job;
+                int serviceDetailCount = (from x in context.JobDetails
+                                          where x.JobID == serviceId
+                                          select x).Count();
+                int finishedServiceDetailCount = (from x in context.JobDetails
+                                                  where x.JobID == serviceId && x.Completed == true
+                                                  select x).Count();
+
+                //check if a service detail was deleted and all other service details are already done.
+                if (serviceDetailCount - 1 == finishedServiceDetailCount)
+                {
+                    service.JobDateDone = DateTime.Now;
+                    //save changes to database
+                    context.Entry(service).State = System.Data.Entity.EntityState.Modified;
+                }
                 context.JobDetailParts.RemoveRange(serviceDetailParts);
                 context.JobDetails.Remove(serviceDetail);
                 context.SaveChanges();

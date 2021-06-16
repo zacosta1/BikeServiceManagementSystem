@@ -310,9 +310,10 @@
                                                 <asp:Label Text='<%# Eval("Coupon") %>' runat="server" ID="CouponLabel" /></td>
                                             <td class="align-middle">
                                                 <asp:LinkButton runat="server" ID="EditServiceDetailButton" CommandName="Edit" 
-                                                            CssClass="btn btn-link btn-block text-decoration-none" ToolTip="Add Comment" style="min-height:2.5rem;">
+                                                    CssClass="btn btn-link btn-block text-decoration-none d-flex align-items-center justify-content-between" ToolTip="Add Comment"
+                                                    style="min-height:2.5rem;">
                                                     <asp:Label Text='<%# Eval("Comments") %>' runat="server" ID="CommentsLabel"/>
-                                                    <span class="float-right"><i class="bi bi-pencil-fill"></i></span>
+                                                    <i class="bi bi-pencil-fill"></i>
                                                 </asp:LinkButton></td>
                                             <td class="align-middle">
                                                 <asp:Label Text='<%# Eval("Status") %>' runat="server" ID="StatusLabel" /></td>
