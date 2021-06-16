@@ -230,7 +230,7 @@ public partial class Servicing : System.Web.UI.Page
             Button serviceStatusUpdateButton = e.Item.FindControl("ServiceStatusButton") as Button;
             Button removeServiceButton = e.Item.FindControl("RemoveServiceDetailButton") as Button;
 
-            //modify StatusUpdate button text depending on each service detail's current status
+            //change StatusUpdate button text and visibility, and RemoveServiceDetail button visibility, depending on each service detail's current status
             switch (currentServiceDetailStatus)
             {
                 case null:
@@ -267,10 +267,10 @@ public partial class Servicing : System.Web.UI.Page
         ServiceDetailsListView.DataBind();
 
         ListViewItem selectedServiceDetail = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
-        int selectedServiceDetailID = int.Parse((selectedServiceDetail.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
+        int selectedServiceDetailId = int.Parse((selectedServiceDetail.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
         string selectedServiceDetailDescription = (selectedServiceDetail.FindControl("DescriptionLabel") as Label).Text.Trim();
 
-        List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(selectedServiceDetailID);
+        List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(selectedServiceDetailId);
 
         SelectedServiceDetailDescriptionLabel.Text = selectedServiceDetailDescription;
         SelectedServiceDetailDescriptionLabel2.Text = selectedServiceDetailDescription;
@@ -407,15 +407,15 @@ public partial class Servicing : System.Web.UI.Page
         if (ServiceDetailsListView.Items.Count == 1)
         {
             ListViewItem serviceDetailRow = ServiceDetailsListView.Items[i];
-            int serviceDetailID = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-            int serviceID = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
+            int serviceDetailId = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+            int serviceId = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
 
             MessageUserControl.Visible = true;
             MessageUserControl.TryRun(() =>
             {
                 ServiceController sysmgr = new ServiceController();
-                sysmgr.Delete_ServiceDetail(serviceDetailID);
-                sysmgr.Delete_Service(serviceID);
+                sysmgr.Delete_ServiceDetail(serviceDetailId);
+                sysmgr.Delete_Service(serviceId);
 
                 Clear_AddNewServicesForm();
 
@@ -426,31 +426,31 @@ public partial class Servicing : System.Web.UI.Page
                 ServicesListView.SelectedIndex = -1;
                 ServicesListView.DataBind();
 
-            }, "Service Removed", "Service #" + serviceID + " had no more details and has been removed.");
+            }, "Service Removed", "Service #" + serviceId + " had no more details and has been removed.");
         }
         //delete only the service detail
         else
         {
             ListViewItem serviceDetailRow = ServiceDetailsListView.Items[i];
-            int serviceDetailID = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-            int serviceID = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
+            int serviceDetailId = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+            int serviceId = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
 
             MessageUserControl.Visible = true;
             MessageUserControl.TryRun(() =>
             {
                 ServiceController sysmgr = new ServiceController();
-                sysmgr.Delete_ServiceDetail(serviceDetailID);
+                sysmgr.Delete_ServiceDetail(serviceDetailId);
 
                 Clear_AddNewServicesForm();
 
                 //refresh current service details list
-                ServiceDetailsListView.DataSource = sysmgr.List_ServiceDetails(serviceID);
+                ServiceDetailsListView.DataSource = sysmgr.List_ServiceDetails(serviceId);
                 ServiceDetailsListView.DataBind();
 
                 //keep showing service details panel
                 ServiceDetailsPanel.Visible = true;
 
-            }, "Service Detail Removed", "Service detail has been removed from service #" + serviceID + ".");
+            }, "Service Detail Removed", "Service detail has been removed from service #" + serviceId + ".");
         }
     }
 
@@ -461,7 +461,7 @@ public partial class Servicing : System.Web.UI.Page
         {
             //fetch Service ID from selected service row
             ListViewItem selectedServiceRow = ServicesListView.Items[ServicesListView.SelectedIndex];
-            int selectedServiceID = int.Parse((selectedServiceRow.FindControl("ServiceIDLabel") as Label).Text);
+            int selectedServiceId = int.Parse((selectedServiceRow.FindControl("ServiceIDLabel") as Label).Text);
 
             //fetch entered data in the insert row
             ListViewItem insertServiceDetailRow = e.Item;
@@ -475,7 +475,7 @@ public partial class Servicing : System.Web.UI.Page
 
             //add the service detail to the selected service
             JobDetail newServiceDetail = new JobDetail();
-            newServiceDetail.JobID = selectedServiceID;
+            newServiceDetail.JobID = selectedServiceId;
             newServiceDetail.Description = description;
             newServiceDetail.JobHours = hours;
             if (couponId == 0)
@@ -546,54 +546,54 @@ public partial class Servicing : System.Web.UI.Page
     {
         //get Service detail ID from currently-selected service detail
         ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
-        int serviceDetailID = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
+        int serviceDetailId = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
         string serviceDetailDescription = (selectedServiceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
 
         //fetch input in the CurrentServiceDetailPartsListView insert row
         ListViewItem serviceDetailPartInsertRow = e.Item;
         TextBox insertPartIdTb = serviceDetailPartInsertRow.FindControl("PartIDTextBox") as TextBox;
         TextBox insertQuantityTb = serviceDetailPartInsertRow.FindControl("QuantityTextBox") as TextBox;
-        int insertPartID = int.Parse(insertPartIdTb.Text.Trim());
+        int insertPartId = int.Parse(insertPartIdTb.Text.Trim());
         short insertQuantity = short.Parse(insertQuantityTb.Text.Trim());
 
         //validate if the entered part exists
         ServiceController sysmgr = new ServiceController();
-        bool? insertingPartIsValid = sysmgr.Validate_Part(insertPartID, insertQuantity);
+        bool? insertingPartIsValid = sysmgr.Validate_Part(insertPartId, insertQuantity);
 
         MessageUserControl.Visible = true;
 
         if (insertingPartIsValid == null)
         {
-            MessageUserControl.ShowValidationError("Invalid Part Number", "Provided part number " + insertPartID + " was not found or does not exist in the parts inventory.");
+            MessageUserControl.ShowValidationError("Invalid Part Number", "Provided part number " + insertPartId + " was not found or does not exist in the parts inventory.");
             insertPartIdTb.Focus();
             insertPartIdTb.CssClass = "form-control is-invalid";
         }
         else if (insertingPartIsValid == false)
         {
-            Part foundPart = sysmgr.Lookup_Part(insertPartID);
-            string foundPartDescription = foundPart.Description;
+            Part foundPart = sysmgr.Lookup_Part(insertPartId);
+            string partDescription = foundPart.Description;
             int quantityOnHand = foundPart.QuantityOnHand;
-            MessageUserControl.ShowValidationError("Invalid Quantity", "Not enough " + foundPartDescription + " in stock. Quantity must be " + quantityOnHand + " or less.");
+            MessageUserControl.ShowValidationError("Invalid Quantity", "Not enough " + partDescription + " in stock. Quantity must be " + quantityOnHand + " or less.");
             insertQuantityTb.Focus();
             insertQuantityTb.CssClass = "form-control is-invalid";
         }
         else if (insertingPartIsValid == true)
         {
-            Part foundPart = sysmgr.Lookup_Part(insertPartID);
-            string foundPartDescription = foundPart.Description;
+            Part foundPart = sysmgr.Lookup_Part(insertPartId);
+            string partDescription = foundPart.Description;
             int quantityOnHand = foundPart.QuantityOnHand;
 
             MessageUserControl.TryRun(() =>
             {
-                sysmgr.Add_ServiceDetailPart(serviceDetailID, insertPartID, insertQuantity);
+                sysmgr.Add_ServiceDetailPart(serviceDetailId, insertPartId, insertQuantity);
 
                 //refresh Service Detail Parts ListView
-                List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(serviceDetailID);
+                List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(serviceDetailId);
                 ServiceDetailPartsListView.DataSource = serviceDetailPartsList;
                 ServiceDetailPartsListView.DataBind();
                 insertPartIdTb.Focus();
 
-            }, "Service Detail Part added", foundPartDescription + " has been added to the "+ serviceDetailDescription + " service.");
+            }, "Service Detail Part Added", partDescription + " has been added to the "+ serviceDetailDescription + " service.");
         }
 
         ServiceDetailsPanel.Visible = true;
@@ -628,7 +628,7 @@ public partial class Servicing : System.Web.UI.Page
 
         //get Service Detail ID and description from currently-selected service detail
         ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
-        int serviceDetailID = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
+        int serviceDetailId = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
         string serviceDetailDescription = (selectedServiceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
 
         //fetch edit row input
@@ -641,40 +641,62 @@ public partial class Servicing : System.Web.UI.Page
 
         //validate if the entered part exists
         ServiceController sysmgr = new ServiceController();
-        bool newQuantityIsValid = sysmgr.Validate_Part_Quantity(serviceDetailPartId, inventoryPartId, newQuantity);
+        bool? newQuantityIsValid = sysmgr.Validate_Part_Quantity(serviceDetailPartId, inventoryPartId, newQuantity);
 
         MessageUserControl.Visible = true;
-        if (newQuantityIsValid == false)
+        if (newQuantityIsValid == null)
         {
+            //refresh current service detail parts list
+            List<ServiceDetailPartPOCO> serviceDetailPartsResults = sysmgr.List_ServiceDetailParts(serviceDetailId);
+
+            ServiceDetailPartsListView.DataSource = serviceDetailPartsResults;
+            ServiceDetailPartsListView.EditIndex = e.ItemIndex;
+            ServiceDetailPartsListView.InsertItemPosition = 0;
+
             Part foundPart = sysmgr.Lookup_Part(inventoryPartId);
-            string foundPartDescription = foundPart.Description;
+            string partDescription = foundPart.Description;
             int quantityOnOrder = foundPart.QuantityOnOrder;
-            MessageUserControl.ShowValidationError("Invalid Quantity", "Not enough " + foundPartDescription + " left in stock for the " + serviceDetailDescription + " service to use. " + quantityOnOrder + " " + foundPartDescription + " are currently on order.");
+            MessageUserControl.ShowValidationError("No Changes Were Made", "The " + serviceDetailDescription + " service already uses/used the same quantity of " + partDescription + " as the newly-entered quantity value.");
+            editPartQuantityTb.CssClass = "form-control is-invalid";
+            editPartQuantityTb.Focus();
+        }
+        else if (newQuantityIsValid == false)
+        {
+            //refresh current service detail parts list
+            List<ServiceDetailPartPOCO> serviceDetailPartsResults = sysmgr.List_ServiceDetailParts(serviceDetailId);
+
+            ServiceDetailPartsListView.DataSource = serviceDetailPartsResults;
+            ServiceDetailPartsListView.EditIndex = e.ItemIndex;
+            ServiceDetailPartsListView.InsertItemPosition = 0;
+
+            Part foundPart = sysmgr.Lookup_Part(inventoryPartId);
+            string partDescription = foundPart.Description;
+            int quantityOnOrder = foundPart.QuantityOnOrder;
+            MessageUserControl.ShowValidationError("Invalid Quantity", "Not enough " + partDescription + " left in stock for the " + serviceDetailDescription + " service to use. " + quantityOnOrder + " " + partDescription + " are currently on order.");
             editPartQuantityTb.CssClass = "form-control is-invalid";
             editPartQuantityTb.Focus();
         }
         else
         {
             Part foundPart = sysmgr.Lookup_Part(inventoryPartId);
-            string foundPartDescription = foundPart.Description;
+            string partDescription = foundPart.Description;
             int quantityOnHand = foundPart.QuantityOnHand;
             MessageUserControl.TryRun(() =>
             {
                 sysmgr.Update_ServiceDetailPart_Quantity(serviceDetailPartId, newQuantity);
 
                 //refresh current service detail parts list
-                List<ServiceDetailPartPOCO> serviceDetailPartsResults = sysmgr.List_ServiceDetailParts(serviceDetailID);
+                List<ServiceDetailPartPOCO> serviceDetailPartsResults = sysmgr.List_ServiceDetailParts(serviceDetailId);
 
                 ServiceDetailPartsListView.DataSource = serviceDetailPartsResults;
                 ServiceDetailPartsListView.EditIndex = -1;
                 ServiceDetailPartsListView.DataBind();
-            }, "Quantity Updated", "Quantity of " + foundPartDescription + " in the " + serviceDetailDescription + " service has been updated.");
+            }, "Quantity Updated", "Quantity of " + partDescription + " in the " + serviceDetailDescription + " service has been updated.");
         }
     }
 
     protected void ServiceDetailPartsListView_ItemCanceling(object sender, ListViewCancelEventArgs e)
     {
-
         ServiceController sysmgr = new ServiceController();
         //if there's an item being edited, and the cancel button is clicked,
         if (ServiceDetailPartsListView.EditIndex != -1)
@@ -712,19 +734,19 @@ public partial class Servicing : System.Web.UI.Page
     protected void ServiceDetailPartsListView_ItemDeleting(object sender, ListViewDeleteEventArgs e)
     {
         ListViewItem serviceDetailPartRow = ServiceDetailPartsListView.Items[e.ItemIndex];
-        int serviceDetailPartID = int.Parse((serviceDetailPartRow.FindControl("ServiceDetailPartIDLabel") as Label).Text);
+        int serviceDetailPartId = int.Parse((serviceDetailPartRow.FindControl("ServiceDetailPartIDLabel") as Label).Text);
 
         MessageUserControl.TryRun(() =>
         {
             //get Service detail ID from currently-selected service detail
             ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
-            int serviceDetailID = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+            int serviceDetailId = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
 
             ServiceController sysmgr = new ServiceController();
-            sysmgr.Delete_ServiceDetailPart(serviceDetailPartID);
+            sysmgr.Delete_ServiceDetailPart(serviceDetailPartId);
 
             //refresh Service Detail Parts ListView
-            List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(serviceDetailID);
+            List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(serviceDetailId);
             ServiceDetailPartsListView.DataSource = serviceDetailPartsList;
             ServiceDetailPartsListView.DataBind();
 

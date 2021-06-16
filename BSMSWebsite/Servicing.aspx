@@ -529,7 +529,7 @@
                                                                 <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"/>
                                                                 <small>
                                                                     <asp:CompareValidator ErrorMessage="Quantity must not be less than or equal to zero." ControlToValidate="QuantityTextBox"
-                                                                        runat="server" CssClass="text-danger" ValidationGroup="EditPartQuantityGroup" Display="Dynamic" SetFocusOnError ="true"
+                                                                        runat="server" CssClass="text-danger" ValidationGroup="EditPartQuantityGroup" Display="Dynamic" SetFocusOnError="true"
                                                                         Operator="GreaterThan" ValueToCompare="0" />
                                                                 </small>
                                                             </td>

@@ -289,7 +289,7 @@ namespace BSMSSystem.BLL
         }
 
         [DataObjectMethod(DataObjectMethodType.Select, false)]
-        public bool Validate_Part_Quantity(int serviceDetailPartId, int partId, short newQuantity)
+        public bool? Validate_Part_Quantity(int serviceDetailPartId, int partId, short newQuantity)
         {
             using (var context = new BSMSContext())
             {
@@ -299,9 +299,13 @@ namespace BSMSSystem.BLL
                 Part part = (from x in context.Parts
                             where x.PartID == partId
                             select x).FirstOrDefault();
-                bool valid;
+                bool? valid;
 
-                if (part != null && newQuantity <= serviceDetailPart.Quantity + part.QuantityOnHand)
+                if (part != null && newQuantity == serviceDetailPart.Quantity)
+                {
+                    valid = null;
+                }
+                else if (part != null && newQuantity <= serviceDetailPart.Quantity + part.QuantityOnHand)
                 {
                     valid = true;
                 }
