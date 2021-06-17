@@ -53,10 +53,11 @@
                                         DataValueField="CustomerID"
                                         AppendDataBoundItems="true"
                                         CssClass="custom-select"
-                                        ToolTip="Select the customer for the service.">
+                                        ToolTip="Select the customer for the service."
+                                        aria-describedby="newServiceModalCustomerHelp">
                                         <asp:ListItem Text="Select..." Value="0" Selected="True"/>
                                     </asp:DropDownList>
-                                    <small>
+                                    <small id="newServiceModalCustomerHelp" class="form-text">
                                         <asp:RequiredFieldValidator ErrorMessage="A customer is required." ControlToValidate="CustomerDropDownList" runat="server"
                                             CssClass="text-danger" ValidationGroup="NewServiceModalGroup" InitialValue="0" Display="Dynamic" SetFocusOnError ="true" />
                                     </small>
@@ -64,8 +65,8 @@
                     
                                 <div class="form-group col-md-6">
                                     <asp:Label runat="server" AssociatedControlID="ServiceVehicleIdentificationTextBox" Text="Vehicle Identification"/>
-                                    <asp:TextBox runat="server" ID="ServiceVehicleIdentificationTextBox" CssClass="form-control" MaxLength="50"/>
-                                    <small>
+                                    <asp:TextBox runat="server" ID="ServiceVehicleIdentificationTextBox" CssClass="form-control" MaxLength="50" aria-describedby="newServiceModalVehicleIdHelp"/>
+                                    <small id="newServiceModalVehicleIdHelp" class="form-text">
                                         <asp:RequiredFieldValidator ErrorMessage="Vehicle ID or model description is required." ControlToValidate="ServiceVehicleIdentificationTextBox" runat="server"
                                             CssClass="text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic" SetFocusOnError ="true" />
                                     </small>
@@ -83,8 +84,9 @@
                                             <div class="form-row">
                                                 <div class="form-group col-12">
                                                     <asp:Label Text="Description" runat="server" AssociatedControlID="NewServiceModalServiceDetailDescriptionTextBox"/>
-                                                    <asp:TextBox runat="server" ID="NewServiceModalServiceDetailDescriptionTextBox" CssClass="form-control" MaxLength="100" />
-                                                    <small>
+                                                    <asp:TextBox runat="server" ID="NewServiceModalServiceDetailDescriptionTextBox" CssClass="form-control" MaxLength="100"
+                                                        aria-describedby="newServiceModalDescriptionHelp"/>
+                                                    <small id="newServiceModalDescriptionHelp" class="form-text">
                                                         <asp:RequiredFieldValidator ErrorMessage="A description is required." ControlToValidate="NewServiceModalServiceDetailDescriptionTextBox"
                                                             runat="server" CssClass="form-text text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic" SetFocusOnError ="true" />
                                                     </small>
@@ -93,16 +95,17 @@
 
                                             <div class="form-row">
                                                 <div class="form-group col-5">
-                                                    <asp:Label Text="Hours" runat="server" AssociatedControlID="NewServiceModalServiceDetailHoursTextBox"/>
-                                                    <asp:TextBox runat="server" ID="NewServiceModalServiceDetailHoursTextBox" CssClass="form-control" MaxLength="6"/>
-                                                    <small>
+                                                    <asp:Label Text="Estimated Duration" runat="server" AssociatedControlID="NewServiceModalServiceDetailHoursTextBox"/>
+                                                    <asp:TextBox runat="server" ID="NewServiceModalServiceDetailHoursTextBox" CssClass="form-control" MaxLength="6"
+                                                        placeholder="Hours" aria-describedby="newServiceModalHoursHelp"/>
+                                                    <small id="newServiceModalHoursHelp" class="form-text">
                                                         <asp:RequiredFieldValidator ErrorMessage="Estimated duration is required." ControlToValidate="NewServiceModalServiceDetailHoursTextBox"
                                                             runat="server"
                                                             CssClass="text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic" SetFocusOnError ="true"/>
-                                                        <asp:RegularExpressionValidator ErrorMessage="Estimated duration requires a valid integer or a decimal number with one or two decimal places."
-                                                            ControlToValidate="NewServiceModalServiceDetailHoursTextBox" runat="server"
-                                                            ValidationExpression="((\d{1,3})((\.\d{1,2})?))$" CssClass="text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic"
-                                                            SetFocusOnError ="true" />
+                                                        <asp:RegularExpressionValidator
+                                                            ErrorMessage="Estimated duration must be a valid integer or a decimal number, with one or two decimal places, below 1000."
+                                                            ControlToValidate="NewServiceModalServiceDetailHoursTextBox" runat="server" ValidationExpression="((\d{1,3})((\.\d{1,2})?))$"
+                                                            CssClass="text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic" SetFocusOnError ="true" />
                                                     </small>
                                                 </div>
                                                 <div class="form-group col-7">
@@ -331,7 +334,7 @@
                                                             Text="Start" CssClass="dropdown-item" ToolTip="Start Service Detail" type="button" CausesValidation="false"/>
                                                         <asp:Button runat="server" ID="RemoveServiceDetailButton" CommandName="Delete"
                                                             CssClass="dropdown-item"
-                                                            Text="Remove" ToolTip="Remove Service Detail" type="button" CausesValidation="false"/>
+                                                            Text="Cancel" ToolTip="Cancel Service Detail" type="button" CausesValidation="false"/>
                                                     </div>
                                                 </div>
                                             </td>
@@ -370,7 +373,7 @@
                                             <td class="align-middle">
                                                 <asp:Label Text='<%# Bind("Coupon") %>' runat="server" ID="CouponLabel"/></td>
                                             <td class="align-middle">
-                                                <asp:Label Text='<%# Bind("Comments") %>' runat="server" ID="ServiceDetailCommentsLabel" CssClass="d-block mb-2"/>
+                                                <asp:Label Text='<%# Bind("Comments") %>' runat="server" ID="ServiceDetailCommentsLabel" CssClass="d-block mb-2" aria-describedby="editRowCommentsHelp"/>
                                                 <div class="d-block d-flex align-items-center">
                                                     <textarea runat="server" ID="ServiceDetailCommentsTextArea" class="form-control flex-grow-1"
                                                         ToolTip="Add comments" Placeholder="Add comments..." style="min-height:2.5rem; min-width:12rem;" rows="1"/>
@@ -384,8 +387,8 @@
                                                         <i class="bi bi-x-circle-fill h4"></i>
                                                     </asp:LinkButton>
                                                 </div>
-                                                <small class="d-block text-left">
-                                                    <asp:RequiredFieldValidator ErrorMessage="Comments text field must not be empty."
+                                                <small id="editRowCommentsHelp" class="form-text text-left">
+                                                    <asp:RequiredFieldValidator ErrorMessage="New comments must not be blank or just whitespace."
                                                         ControlToValidate="ServiceDetailCommentsTextArea" runat="server" CssClass="text-danger" ValidationGroup="EditServiceDetailGroup"
                                                         Display="Dynamic" SetFocusOnError ="true"/>
                                                 </small>
@@ -401,22 +404,22 @@
                                                 <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" Visible="false"/>
                                                 <asp:Label Text='<%# Bind("ServiceID") %>' runat="server" ID="ServiceIDLabel" Visible="false"/>
                                                 <asp:TextBox Text='<%# Bind("Description") %>' runat="server" ID="InsertRowServiceDetailDescriptionTextBox" CssClass="form-control"
-                                                    placeholder="Description" MaxLength="100" />
-                                                <small>
+                                                    placeholder="Description" MaxLength="100" aria-describedby="insertRowDescriptionHelp" />
+                                                <small id="insertRowDescriptionHelp" class="form-text">
                                                     <asp:RequiredFieldValidator ErrorMessage="A description is required." ControlToValidate="InsertRowServiceDetailDescriptionTextBox" runat="server"
                                                         CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic" SetFocusOnError ="true" />
                                                 </small></td>
                                             <td class="align-top">
                                                 <asp:TextBox Text='<%# Bind("ServiceDetailHours") %>' runat="server" ID="InsertRowServiceDetailHoursTextBox" CssClass="form-control"
-                                                    placeholder="Estimated Duration (in Hours)" MaxLength="6"/>
-                                                    <small>
-                                                        <asp:RequiredFieldValidator ErrorMessage="Estimated duration is required." ControlToValidate="InsertRowServiceDetailHoursTextBox" runat="server"
-                                                            CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic" SetFocusOnError ="true" />
-                                                        <asp:RegularExpressionValidator ErrorMessage="Estimated duration requires a valid integer or a decimal number with one or two decimal places."
-                                                            ControlToValidate="InsertRowServiceDetailHoursTextBox" runat="server"
-                                                            ValidationExpression="((\d{1,3})((\.\d{1,2})?))$" CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic"
-                                                            SetFocusOnError ="true" />
-                                                    </small></td>
+                                                    placeholder="Hours" MaxLength="6" aria-describedby="insertRowHoursHelp"/>
+                                                <small id="insertRowHoursHelp" class="form-text">
+                                                    <asp:RequiredFieldValidator ErrorMessage="Estimated duration is required." ControlToValidate="InsertRowServiceDetailHoursTextBox" runat="server"
+                                                        CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                                    <asp:RegularExpressionValidator
+                                                        ErrorMessage="Estimated duration must be a valid integer or a decimal number, with one or two decimal places, below 1000."
+                                                        ControlToValidate="InsertRowServiceDetailHoursTextBox" runat="server" ValidationExpression="((\d{1,3})((\.\d{1,2})?))$"
+                                                        CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                                </small></td>
                                             <td class="align-top">
                                                 <asp:DropDownList runat="server" CssClass="custom-select" ID="InsertRowServiceDetailCouponDropDownList"
                                                     DataSourceID="CouponODS"
@@ -526,8 +529,9 @@
                                                             <td class="align-middle">
                                                                 <asp:Label Text='<%# Bind("PartDescription") %>' runat="server" ID="PartDescriptionLabel" /></td>
                                                             <td class="align-middle">
-                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"/>
-                                                                <small>
+                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"
+                                                                    aria-describedby="editQuantityHelp"/>
+                                                                <small id="editQuantityHelp" class="form-text">
                                                                     <asp:CompareValidator ErrorMessage="Quantity must not be less than or equal to zero." ControlToValidate="QuantityTextBox"
                                                                         runat="server" CssClass="text-danger" ValidationGroup="EditPartQuantityGroup" Display="Dynamic" SetFocusOnError="true"
                                                                         Operator="GreaterThan" ValueToCompare="0" />
@@ -551,20 +555,25 @@
                                                             <td class="align-top" style="min-width:4rem;" colspan="2">
                                                                 <asp:Label Text='<%# Bind("ServiceDetailID") %>' runat="server" ID="ServiceDetailIDLabel" Visible="false" />
                                                                 <asp:Label Text='<%# Bind("ServiceDetailPartID") %>' runat="server" ID="ServiceDetailPartIDLabel" Visible="false"/>
-                                                                <asp:TextBox Text='<%# Bind("PartID") %>' runat="server" ID="PartIDTextBox" CssClass="form-control" placeholder="Part #"/>
-                                                                <small>
+                                                                <asp:TextBox Text='<%# Bind("PartID") %>' runat="server" ID="PartIDTextBox" CssClass="form-control" placeholder="Part #"
+                                                                    aria-describedby="insertPartIdHelp" />
+                                                                <small id="insertPartIdHelp" class="form-text">
                                                                     <asp:RequiredFieldValidator ErrorMessage="Part number is required." ControlToValidate="PartIDTextBox" runat="server"
                                                                         CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic" SetFocusOnError="true" />
+                                                                    <asp:RegularExpressionValidator ErrorMessage="Must be an unsigned number." ControlToValidate="PartIDTextBox" runat="server"
+                                                                        ValidationExpression="^[0-9]+$" CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic"
+                                                                        SetFocusOnError ="true" />
                                                                 </small>
                                                                 <asp:Label Text='<%# Bind("PartDescription") %>' runat="server" ID="PartDescriptionLabel" Visible="false"/></td>
                                                             <td class="align-top">
-                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"/>
-                                                                <small>
+                                                                <asp:TextBox Text='<%# Bind("Quantity") %>' runat="server" ID="QuantityTextBox" CssClass="form-control" placeholder="Quantity"
+                                                                    aria-describedby="insertPartQuantityHelp"/>
+                                                                <small id="insertPartQuantityHelp" class="form-text">
                                                                     <asp:RequiredFieldValidator ErrorMessage="Quantity is required." ControlToValidate="QuantityTextBox" runat="server"
                                                                         CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic" SetFocusOnError ="true" />
-                                                                    <asp:CompareValidator ErrorMessage="Quantity must not be less than or equal to zero." ControlToValidate="QuantityTextBox"
-                                                                        runat="server" CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic" SetFocusOnError ="true"
-                                                                        Operator="GreaterThan" ValueToCompare="0" />
+                                                                    <asp:RegularExpressionValidator ErrorMessage="Must be an integer greater than zero." ControlToValidate="QuantityTextBox" runat="server"
+                                                                        ValidationExpression="^[1-9]+$" CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic"
+                                                                        SetFocusOnError ="true" />
                                                                 </small>
                                                             </td>
                                                             <td class="align-middle">

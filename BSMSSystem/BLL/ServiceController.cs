@@ -96,10 +96,10 @@ namespace BSMSSystem.BLL
                               {
                                   ServiceDetailID = x.JobDetailID,
                                   ServiceID = x.JobID,
-                                  Description = x.Description,
+                                  Description = x.Description.Trim(),
                                   ServiceDetailHours = x.JobHours,
-                                  Coupon = x.Coupon.CouponIDValue,
-                                  Comments = x.Comments,
+                                  Coupon = x.Coupon.CouponIDValue.Trim(),
+                                  Comments = x.Comments.Trim(),
                                   Status = x.Completed == false ? "Started" :
                                             x.Completed == true ? "Done" :
                                             null

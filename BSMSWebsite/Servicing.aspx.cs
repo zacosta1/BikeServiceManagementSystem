@@ -12,6 +12,7 @@ using BSMSSystem.BLL;
 using BSMSSystem.BLL.Security;
 using BSMSData.Entities;
 using System.Web.UI.HtmlControls;
+using System.Globalization;
 #endregion
 
 public partial class Servicing : System.Web.UI.Page
@@ -103,12 +104,16 @@ public partial class Servicing : System.Web.UI.Page
                 newService.EmployeeID = usermgr.Get_EmployeeID(User.Identity.Name);
                 newService.ShopRate = 50;
                 newService.StatusCode = "I";
-                newService.VehicleIdentification = ServiceVehicleIdentificationTextBox.Text;
+                newService.VehicleIdentification = ServiceVehicleIdentificationTextBox.Text.Trim();
 
                 //add the first service detail of the service
                 JobDetail newServiceDetail = new JobDetail();
                 newServiceDetail.JobID = newService.JobID;
-                newServiceDetail.Description = NewServiceModalServiceDetailDescriptionTextBox.Text;
+
+                // Creates a TextInfo based on the "en-US" culture.
+                TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+                newServiceDetail.Description = textInfo.ToTitleCase(NewServiceModalServiceDetailDescriptionTextBox.Text.Trim());
+
                 if (NewServiceModalCouponDropDownList.SelectedValue == "0")
                 {
                     newServiceDetail.CouponID = null;
@@ -117,7 +122,7 @@ public partial class Servicing : System.Web.UI.Page
                 {
                     newServiceDetail.CouponID = int.Parse(NewServiceModalCouponDropDownList.SelectedValue);
                 }
-                newServiceDetail.JobHours = decimal.Parse(NewServiceModalServiceDetailHoursTextBox.Text);
+                newServiceDetail.JobHours = decimal.Parse(NewServiceModalServiceDetailHoursTextBox.Text.Trim());
                 newServiceDetail.Comments = NewServiceModalServiceDetailCommentsTextBox.InnerText;
 
                 //add the new service to the database
@@ -146,11 +151,11 @@ public partial class Servicing : System.Web.UI.Page
 
         ListViewItem serviceRow = ServicesListView.Items[ServicesListView.SelectedIndex];
 
-        int serviceId = int.Parse((serviceRow.FindControl("ServiceIDLabel") as Label).Text);
-        string customer = (serviceRow.FindControl("CustomerNameLabel") as Label).Text;
-        string vehicleIdentification = (serviceRow.FindControl("VehicleIdentificationLabel") as Label).Text;
+        int serviceId = int.Parse((serviceRow.FindControl("ServiceIDLabel") as Label).Text.Trim());
+        string customer = (serviceRow.FindControl("CustomerNameLabel") as Label).Text.Trim();
+        string vehicleIdentification = (serviceRow.FindControl("VehicleIdentificationLabel") as Label).Text.Trim();
 
-        SelectedServiceIDLabel.Text = serviceId.ToString();
+        SelectedServiceIDLabel.Text = serviceId.ToString().Trim();
         SelectedServiceCustomerNameLabel.Text = customer;
         SelectedServiceVehicleIdentificationLabel.Text = vehicleIdentification;
 
@@ -269,8 +274,11 @@ public partial class Servicing : System.Web.UI.Page
 
         List<ServiceDetailPartPOCO> serviceDetailPartsList = sysmgr.List_ServiceDetailParts(selectedServiceDetailId);
 
-        SelectedServiceDetailDescriptionLabel.Text = selectedServiceDetailDescription;
-        SelectedServiceDetailDescriptionLabel2.Text = selectedServiceDetailDescription;
+        // Creates a TextInfo based on the "en-US" culture.
+        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+
+        SelectedServiceDetailDescriptionLabel.Text = textInfo.ToTitleCase(selectedServiceDetailDescription);
+        SelectedServiceDetailDescriptionLabel2.Text = textInfo.ToTitleCase(selectedServiceDetailDescription);
 
         ServiceDetailPartsPanel.Visible = true;
         ServiceDetailPartsListView.InsertItemPosition = (InsertItemPosition)2;
@@ -324,8 +332,6 @@ public partial class Servicing : System.Web.UI.Page
             TextBox serviceDetailDescriptionTb = insertRow.FindControl("InsertRowServiceDetailDescriptionTextBox") as TextBox;
             serviceDetailDescriptionTb.Focus();
         }
-
-        ServiceDetailsListView.InsertItemPosition = (InsertItemPosition)2;
 
         ServiceDetailPartsListView.DataSource = null;
         ServiceDetailPartsListView.DataBind();
@@ -421,14 +427,15 @@ public partial class Servicing : System.Web.UI.Page
     {
         int i = e.ItemIndex;
 
+        ListViewItem serviceDetailRow = ServiceDetailsListView.Items[i];
+        int serviceDetailId = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+        string serviceDetailDescription = (serviceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
+        int serviceId = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
+
+        MessageUserControl.Visible = true;
         //delete the service along with the only service detail associated with it
         if (ServiceDetailsListView.Items.Count == 1)
         {
-            ListViewItem serviceDetailRow = ServiceDetailsListView.Items[i];
-            int serviceDetailId = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-            int serviceId = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
-
-            MessageUserControl.Visible = true;
             MessageUserControl.TryRun(() =>
             {
                 ServiceController sysmgr = new ServiceController();
@@ -444,16 +451,11 @@ public partial class Servicing : System.Web.UI.Page
                 ServicesListView.SelectedIndex = -1;
                 ServicesListView.DataBind();
 
-            }, "Service Removed", "Service #" + serviceId + " had no more details and has been removed.");
+            }, "Service Cancelled", "Service #" + serviceId + " had no more service details and has been cancelled.");
         }
         //delete only the service detail
         else
         {
-            ListViewItem serviceDetailRow = ServiceDetailsListView.Items[i];
-            int serviceDetailId = int.Parse((serviceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-            int serviceId = int.Parse((serviceDetailRow.FindControl("ServiceIDLabel") as Label).Text);
-
-            MessageUserControl.Visible = true;
             MessageUserControl.TryRun(() =>
             {
                 ServiceController sysmgr = new ServiceController();
@@ -470,54 +472,74 @@ public partial class Servicing : System.Web.UI.Page
                 //keep showing service details panel
                 ServiceDetailsPanel.Visible = true;
 
-            }, "Service Detail Removed", "Service detail has been removed from service #" + serviceId + ".");
+            }, "Service Detail Cancelled", serviceDetailDescription + " service detail has been cancelled from service #" + serviceId + ".");
         }
     }
 
     protected void ServiceDetailsListView_ItemInserting(object sender, ListViewInsertEventArgs e)
     {
+        //fetch Service ID from selected service row
+        ListViewItem selectedServiceRow = ServicesListView.Items[ServicesListView.SelectedIndex];
+        int selectedServiceId = int.Parse((selectedServiceRow.FindControl("ServiceIDLabel") as Label).Text.Trim());
+
+        //fetch entered data in the insert row
+        ListViewItem insertServiceDetailRow = e.Item;
+        TextBox descriptionTextBox = insertServiceDetailRow.FindControl("InsertRowServiceDetailDescriptionTextBox") as TextBox;
+
+        string description = descriptionTextBox.Text.Trim();
+        // Creates a TextInfo based on the "en-US" culture.
+        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+        textInfo.ToTitleCase(description);
+        decimal hours = decimal.Parse((insertServiceDetailRow.FindControl("InsertRowServiceDetailHoursTextBox") as TextBox).Text.Trim());
+        int couponId = int.Parse((insertServiceDetailRow.FindControl("InsertRowServiceDetailCouponDropDownList") as DropDownList).SelectedValue.Trim());
+
+        HtmlTextArea commentsTextArea = insertServiceDetailRow.FindControl("ServiceDetailCommentsTextArea") as HtmlTextArea;
+        string comments = commentsTextArea.InnerText.Trim();
+
+        //at this point, client-side validation either passed or is compromised through html editing (string length html attribute can be modified through browser's inspect tool).
+        //validate string length and post-back message user control showing errors in the form.
+
         MessageUserControl.Visible = true;
-        MessageUserControl.TryRun(() =>
+        if (description.Length > 100)
         {
-            //fetch Service ID from selected service row
-            ListViewItem selectedServiceRow = ServicesListView.Items[ServicesListView.SelectedIndex];
-            int selectedServiceId = int.Parse((selectedServiceRow.FindControl("ServiceIDLabel") as Label).Text);
+            MessageUserControl.ShowValidationError("Character limit exceeded.", "The provided service detail description exceeded the 100-character limit.");
+            descriptionTextBox.CssClass = "form-control is-invalid";
+            descriptionTextBox.Focus();
 
-            //fetch entered data in the insert row
-            ListViewItem insertServiceDetailRow = e.Item;
-            string description = (insertServiceDetailRow.FindControl("InsertRowServiceDetailDescriptionTextBox") as TextBox).Text.Trim();
-            decimal hours = decimal.Parse((insertServiceDetailRow.FindControl("InsertRowServiceDetailHoursTextBox") as TextBox).Text.Trim());
-            int couponId = int.Parse((insertServiceDetailRow.FindControl("InsertRowServiceDetailCouponDropDownList") as DropDownList).SelectedValue.Trim());
-
-            HtmlTextArea commentsTextArea = insertServiceDetailRow.FindControl("ServiceDetailCommentsTextArea") as HtmlTextArea;
-            string comments = commentsTextArea.InnerText.Trim();
-
-            //add the service detail to the selected service
-            JobDetail newServiceDetail = new JobDetail();
-            newServiceDetail.JobID = selectedServiceId;
-            newServiceDetail.Description = description;
-            newServiceDetail.JobHours = hours;
-            if (couponId == 0)
+            ServiceDetailsPanel.Visible = true;
+        }
+        else
+        {
+            MessageUserControl.TryRun(() =>
             {
-                newServiceDetail.CouponID = null;
-            }
-            else
-            {
-                newServiceDetail.CouponID = couponId;
-            }
-            newServiceDetail.Comments = comments;
+                //add the service detail to the selected service
+                JobDetail newServiceDetail = new JobDetail();
+                newServiceDetail.JobID = selectedServiceId;
 
-            //add the new service detail to the database
-            ServiceController sysmgr = new ServiceController();
-            sysmgr.Add_ServiceDetail(newServiceDetail);
-            //refresh Listview
-            ServicesListView.DataBind();
-            ServicesListView_SelectedIndexChanged(sender, e);
+                newServiceDetail.Description = description;
+                newServiceDetail.JobHours = hours;
+                if (couponId == 0)
+                {
+                    newServiceDetail.CouponID = null;
+                }
+                else
+                {
+                    newServiceDetail.CouponID = couponId;
+                }
+                newServiceDetail.Comments = comments;
 
-            //clear form fields
-            Clear_AddNewServicesForm();
+                //add the new service detail to the database
+                ServiceController sysmgr = new ServiceController();
+                sysmgr.Add_ServiceDetail(newServiceDetail);
+                //refresh Listview
+                ServicesListView.DataBind();
+                ServicesListView_SelectedIndexChanged(sender, e);
 
-        }, "Success", "New service detail added to selected service.");
+                //clear form fields
+                Clear_AddNewServicesForm();
+
+            }, "Success", description + " service has been added to service #" + selectedServiceId + ".");
+        }
     }
 
     protected void ServiceDetailsListView_ItemUpdating(object sender, ListViewUpdateEventArgs e)
@@ -529,6 +551,7 @@ public partial class Servicing : System.Web.UI.Page
 
         int serviceId = int.Parse((editRow.FindControl("ServiceIDLabel") as Label).Text);
         int serviceDetailId = int.Parse((editRow.FindControl("ServiceDetailIDLabel") as Label).Text);
+        string serviceDetailDescription = (editRow.FindControl("ServiceDetailDescriptionLabel") as Label).Text.Trim();
         string existingComments = (editRow.FindControl("ServiceDetailCommentsLabel") as Label).Text.Trim();
         string inputComments = (editRow.FindControl("ServiceDetailCommentsTextArea") as HtmlTextArea).InnerText.Trim();
 
@@ -544,7 +567,7 @@ public partial class Servicing : System.Web.UI.Page
             ServiceDetailsListView.DataSource = detailResults;
             ServiceDetailsListView.EditIndex = -1;
             ServiceDetailsListView.DataBind();
-        }, "Comment Append Successful", "Additional comments have been added to any existing comments in the currently-selected service detail.");
+        }, "Comment Append Successful", "Additional comments have been added to any existing comments in the " + serviceDetailDescription + " service detail.");
     }
     #endregion
 
@@ -569,6 +592,11 @@ public partial class Servicing : System.Web.UI.Page
         int serviceDetailId = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
         string serviceDetailDescription = (selectedServiceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
 
+        // Creates a TextInfo based on the "en-US" culture.
+        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+        //convert to title case
+        textInfo.ToTitleCase(serviceDetailDescription);
+
         //fetch input in the CurrentServiceDetailPartsListView insert row
         ListViewItem serviceDetailPartInsertRow = e.Item;
         TextBox insertPartIdTb = serviceDetailPartInsertRow.FindControl("PartIDTextBox") as TextBox;
@@ -584,7 +612,7 @@ public partial class Servicing : System.Web.UI.Page
 
         if (insertingPartIsValid == null)
         {
-            MessageUserControl.ShowValidationError("Invalid Part Number", "Provided part number " + insertPartId + " was not found or does not exist in the parts inventory.");
+            MessageUserControl.ShowValidationError("Invalid Part Number", "Provided part #" + insertPartId + " was not found or does not exist in the parts inventory.");
             insertPartIdTb.Focus();
             insertPartIdTb.CssClass = "form-control is-invalid";
         }
@@ -613,7 +641,7 @@ public partial class Servicing : System.Web.UI.Page
                 ServiceDetailPartsListView.DataBind();
                 insertPartIdTb.Focus();
 
-            }, "Service Detail Part Added", partDescription + " has been added to the "+ serviceDetailDescription + " service.");
+            }, "Service Detail Part Added", partDescription + " (x"+ insertQuantity + ") have been added to the "+ serviceDetailDescription + " service.");
         }
 
         ServiceDetailsPanel.Visible = true;
@@ -650,6 +678,11 @@ public partial class Servicing : System.Web.UI.Page
         ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
         int serviceDetailId = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
         string serviceDetailDescription = (selectedServiceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
+
+        // Creates a TextInfo based on the "en-US" culture.
+        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+        //convert to title case
+        textInfo.ToTitleCase(serviceDetailDescription);
 
         //fetch edit row input
         ListViewItem editRow = ServiceDetailPartsListView.EditItem;
@@ -711,7 +744,7 @@ public partial class Servicing : System.Web.UI.Page
                 ServiceDetailPartsListView.DataSource = serviceDetailPartsResults;
                 ServiceDetailPartsListView.EditIndex = -1;
                 ServiceDetailPartsListView.DataBind();
-            }, "Quantity Updated", "Quantity of " + partDescription + " in the " + serviceDetailDescription + " service has been updated.");
+            }, "Quantity Up-to-date", "Quantity of " + partDescription + " used/needed in the " + serviceDetailDescription + " service has been updated.");
         }
     }
 
@@ -734,8 +767,11 @@ public partial class Servicing : System.Web.UI.Page
         else
         {
             ListViewItem insertRow = ServiceDetailPartsListView.InsertItem;
-            (insertRow.FindControl("PartIDTextBox") as TextBox).Text = null;
-            (insertRow.FindControl("QuantityTextBox") as TextBox).Text = null;
+            TextBox partIdTextBox = insertRow.FindControl("PartIDTextBox") as TextBox;
+            partIdTextBox.Text = null;
+            partIdTextBox.Focus();
+            TextBox quantityTextBox = insertRow.FindControl("QuantityTextBox") as TextBox;
+            quantityTextBox.Text = null;
 
             ListViewItem selectedServiceDetail = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
             int serviceDetailId = int.Parse((selectedServiceDetail.FindControl("ServiceDetailIDLabel") as Label).Text);
@@ -753,16 +789,27 @@ public partial class Servicing : System.Web.UI.Page
 
     protected void ServiceDetailPartsListView_ItemDeleting(object sender, ListViewDeleteEventArgs e)
     {
+        //get Service detail info from currently-selected service detail
+        ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
+        int serviceDetailId = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text.Trim());
+        string serviceDetailDescription = (selectedServiceDetailRow.FindControl("DescriptionLabel") as Label).Text.Trim();
+
+        // Creates a TextInfo based on the "en-US" culture.
+        TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+        //convert to title case
+        textInfo.ToTitleCase(serviceDetailDescription);
+
         ListViewItem serviceDetailPartRow = ServiceDetailPartsListView.Items[e.ItemIndex];
         int serviceDetailPartId = int.Parse((serviceDetailPartRow.FindControl("ServiceDetailPartIDLabel") as Label).Text);
+        int partId = int.Parse((serviceDetailPartRow.FindControl("PartIDLabel") as Label).Text.Trim());
 
+        ServiceController sysmgr = new ServiceController();
+        Part foundPart = sysmgr.Lookup_Part(partId);
+        string partDescription = foundPart.Description;
+
+        MessageUserControl.Visible = true;
         MessageUserControl.TryRun(() =>
         {
-            //get Service detail ID from currently-selected service detail
-            ListViewItem selectedServiceDetailRow = ServiceDetailsListView.Items[ServiceDetailsListView.SelectedIndex];
-            int serviceDetailId = int.Parse((selectedServiceDetailRow.FindControl("ServiceDetailIDLabel") as Label).Text);
-
-            ServiceController sysmgr = new ServiceController();
             sysmgr.Delete_ServiceDetailPart(serviceDetailPartId);
 
             //refresh Service Detail Parts ListView
@@ -772,8 +819,7 @@ public partial class Servicing : System.Web.UI.Page
 
             ServiceDetailsPanel.Visible = true;
             ServiceDetailPartsPanel.Visible = true;
-            MessageUserControl.Visible = true;
-        }, "Service Detail Part Removed", "Service detail part has been removed from current service detail.");
+        }, "Service Detail Part Removed", partDescription + " has been removed from the " + serviceDetailDescription  + " service detail.");
     }
     #endregion
 }
