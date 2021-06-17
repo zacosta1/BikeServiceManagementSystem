@@ -103,9 +103,13 @@
                                                             runat="server"
                                                             CssClass="text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic" SetFocusOnError ="true"/>
                                                         <asp:RegularExpressionValidator
-                                                            ErrorMessage="Estimated duration must be a valid integer or a decimal number, with one or two decimal places, below 1000."
-                                                            ControlToValidate="NewServiceModalServiceDetailHoursTextBox" runat="server" ValidationExpression="((\d{1,3})((\.\d{1,2})?))$"
-                                                            CssClass="text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                                            ErrorMessage="Estimated duration must be an integer or a decimal number." ControlToValidate="NewServiceModalServiceDetailHoursTextBox"
+                                                            runat="server" ValidationExpression="((\d{1,3})((\.\d{1,2})?))$" CssClass="text-danger" ValidationGroup="NewServiceModalGroup"
+                                                            Display="Dynamic" SetFocusOnError ="true" />
+                                                        <asp:RangeValidator
+                                                            ErrorMessage="Estimated duration must be between 0 and 1000, exclusive." ControlToValidate="NewServiceModalServiceDetailHoursTextBox"
+                                                            runat="server" MinimumValue="0.01" MaximumValue="999.99" CssClass="text-danger" ValidationGroup="NewServiceModalGroup" Display="Dynamic"
+                                                            SetFocusOnError ="true" />
                                                     </small>
                                                 </div>
                                                 <div class="form-group col-7">
@@ -416,9 +420,13 @@
                                                     <asp:RequiredFieldValidator ErrorMessage="Estimated duration is required." ControlToValidate="InsertRowServiceDetailHoursTextBox" runat="server"
                                                         CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic" SetFocusOnError ="true" />
                                                     <asp:RegularExpressionValidator
-                                                        ErrorMessage="Estimated duration must be a valid integer or a decimal number, with one or two decimal places, below 1000."
-                                                        ControlToValidate="InsertRowServiceDetailHoursTextBox" runat="server" ValidationExpression="((\d{1,3})((\.\d{1,2})?))$"
-                                                        CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                                        ErrorMessage="Estimated duration must be an integer or a decimal number." ControlToValidate="InsertRowServiceDetailHoursTextBox"
+                                                        runat="server" ValidationExpression="((\d{1,3})((\.\d{1,2})?))$" CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup"
+                                                        Display="Dynamic" SetFocusOnError ="true" />
+                                                    <asp:RangeValidator
+                                                        ErrorMessage="Estimated duration must be between 0 and 1000, exclusive." ControlToValidate="InsertRowServiceDetailHoursTextBox"
+                                                        runat="server" MinimumValue="0.01" MaximumValue="999.99" CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic"
+                                                        SetFocusOnError ="true" />
                                                 </small></td>
                                             <td class="align-top">
                                                 <asp:DropDownList runat="server" CssClass="custom-select" ID="InsertRowServiceDetailCouponDropDownList"
@@ -560,8 +568,8 @@
                                                                 <small id="insertPartIdHelp" class="form-text">
                                                                     <asp:RequiredFieldValidator ErrorMessage="Part number is required." ControlToValidate="PartIDTextBox" runat="server"
                                                                         CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic" SetFocusOnError="true" />
-                                                                    <asp:RegularExpressionValidator ErrorMessage="Must be an unsigned number." ControlToValidate="PartIDTextBox" runat="server"
-                                                                        ValidationExpression="^[0-9]+$" CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic"
+                                                                    <asp:RegularExpressionValidator ErrorMessage="Must be an integer greater than zero." ControlToValidate="PartIDTextBox" runat="server"
+                                                                        ValidationExpression="^[1-9]+$" CssClass="text-danger" ValidationGroup="InsertServiceDetailPartGroup" Display="Dynamic"
                                                                         SetFocusOnError ="true" />
                                                                 </small>
                                                                 <asp:Label Text='<%# Bind("PartDescription") %>' runat="server" ID="PartDescriptionLabel" Visible="false"/></td>

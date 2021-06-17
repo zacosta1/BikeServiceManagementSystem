@@ -486,10 +486,9 @@ public partial class Servicing : System.Web.UI.Page
         ListViewItem insertServiceDetailRow = e.Item;
         TextBox descriptionTextBox = insertServiceDetailRow.FindControl("InsertRowServiceDetailDescriptionTextBox") as TextBox;
 
-        string description = descriptionTextBox.Text.Trim();
         // Creates a TextInfo based on the "en-US" culture.
         TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-        textInfo.ToTitleCase(description);
+        string description = textInfo.ToTitleCase(descriptionTextBox.Text.Trim());
         decimal hours = decimal.Parse((insertServiceDetailRow.FindControl("InsertRowServiceDetailHoursTextBox") as TextBox).Text.Trim());
         int couponId = int.Parse((insertServiceDetailRow.FindControl("InsertRowServiceDetailCouponDropDownList") as DropDownList).SelectedValue.Trim());
 
