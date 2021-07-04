@@ -65,6 +65,12 @@
                                 <a runat="server" class="nav-link" href="~/Servicing">Servicing</a>
                             </li>
                             <%  };%>
+                            <% if (Page.User.IsInRole("Website Admins"))
+                                {%>
+                            <li class="nav-item">
+                                <a runat="server" class="nav-link" href="~/Administration/UserRoleAdmin">Users and Roles</a>
+                            </li>
+                            <%  };%>
                             <li class="nav-item">
                                 <a runat="server" class="nav-link" href="~/About">About</a>
                             </li>

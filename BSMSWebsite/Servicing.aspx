@@ -5,7 +5,7 @@
 <asp:Content ID="ServicingContent" ContentPlaceHolderID="MainContent" Runat="Server">
     <div class="jumbotron jumbotron-fluid">
         <div class="container text-center">
-            <h1 class="display-4 mt-5">Servicing</h1>
+            <h1 class="display-4 mt-5"><%: Title %></h1>
             <p class="lead">Bike In-Store Servicing Management</p>
         </div>
     </div>
