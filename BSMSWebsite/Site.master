@@ -59,7 +59,7 @@
                             <li class="nav-item">
                                 <a runat="server" class="nav-link" href="~/" title="Home">Home</a>
                             </li>
-                            <% if (Page.User.IsInRole("Mechanic"))
+                            <% if (Page.User.IsInRole("Mechanic") || Page.User.IsInRole("Website Admins"))
                                 {%>
                             <li class="nav-item">
                                 <a runat="server" class="nav-link" href="~/Servicing">Servicing</a>
