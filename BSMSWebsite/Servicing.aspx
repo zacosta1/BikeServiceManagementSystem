@@ -1,11 +1,11 @@
-﻿<%@ Page Title="Servicing" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeFile="Servicing.aspx.cs" Inherits="Servicing" MaintainScrollPositionOnPostback="true" %>
+﻿<%@ Page Title="Servicing &middot; Zen Bikez" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeFile="Servicing.aspx.cs" Inherits="Servicing" MaintainScrollPositionOnPostback="true" %>
 
 <%@ Register Src="~/User_Controls/MessageUserControl.ascx" TagPrefix="uc1" TagName="MessageUserControl" %>
 
 <asp:Content ID="ServicingContent" ContentPlaceHolderID="MainContent" Runat="Server">
     <div class="jumbotron jumbotron-fluid">
         <div class="container text-center">
-            <h1 class="display-4 mt-5"><%: Title %></h1>
+            <h1 class="display-4 mt-5">Servicing</h1>
             <p class="lead">Bike In-Store Servicing Management</p>
         </div>
     </div>
