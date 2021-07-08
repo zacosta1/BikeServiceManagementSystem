@@ -25,7 +25,7 @@ namespace BSMSSystem.BLL.Security
         /// <summary>Requires FirstName and LastName</summary>
         private const string STR_USERNAME_FORMAT = "{0}{1}";
         /// <summary>Requires UserName</summary>
-        private const string STR_EMAIL_FORMAT = "{0}@eBikes.ca";
+        private const string STR_EMAIL_FORMAT = "{0}@zenbikez.ca";
         private const string STR_WEBMASTER_USERNAME = "Webmaster";
         #endregion
 
@@ -198,7 +198,7 @@ namespace BSMSSystem.BLL.Security
             var verifiedUserName = suggestedUserName;
 
             //the following for() loop will continue to loop until
-            // an unsed UserName has been generated
+            // an unused UserName has been generated
             //the condition searches all current UserNames for the
             //currently generated verified used name (inside loop code)
             //if found the loop will generate a new verified name
@@ -257,7 +257,7 @@ namespace BSMSSystem.BLL.Security
         {
             if (string.IsNullOrEmpty(userinfo.EmployeeId.ToString()))
             {
-                throw new Exception("Employee ID is missing. Remember Employee must be on file to get an user account.");
+                throw new Exception("Employee ID is required. Employee must be on file to get a user account.");
 
             }
             else
@@ -266,7 +266,7 @@ namespace BSMSSystem.BLL.Security
                 Employee existing = sysmgr.Employee_Get(int.Parse(userinfo.EmployeeId.ToString()));
                 if (existing == null)
                 {
-                    throw new Exception("Employee must be on file to get an user account.");
+                    throw new Exception("Employee must be on file to create a user account.");
                 }
                 else
                 {

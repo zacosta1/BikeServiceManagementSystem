@@ -418,7 +418,7 @@
                                                     placeholder="Hours" MaxLength="6" aria-describedby="insertRowHoursHelp"/>
                                                 <small id="insertRowHoursHelp" class="form-text">
                                                     <asp:RequiredFieldValidator ErrorMessage="Estimated duration is required." ControlToValidate="InsertRowServiceDetailHoursTextBox" runat="server"
-                                                        CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic" SetFocusOnError ="true" />
+                                                        CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup" Display="Dynamic" SetFocusOnError="true" />
                                                     <asp:RegularExpressionValidator
                                                         ErrorMessage="Estimated duration must be an integer or a decimal number." ControlToValidate="InsertRowServiceDetailHoursTextBox"
                                                         runat="server" ValidationExpression="((\d{1,3})((\.\d{1,2})?))$" CssClass="text-danger" ValidationGroup="InsertServiceDetailGroup"
