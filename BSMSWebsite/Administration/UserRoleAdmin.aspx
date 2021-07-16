@@ -28,9 +28,10 @@
 
                     <!--Tab panes one for each tab-->
                     <div class="card-body tab-content"> 
+                        <!--Manage Users tab pane-->
                         <div class="tab-pane fade show active" id="user" role="tabpanel" aria-labelledby="user-tab">
                             <h5 class="card-title">Manage Users</h5>
-                            <p class="card-text text-muted">Add or Remove Users</p>
+                            <p class="card-text text-muted">Add or remove users</p>
                             <asp:UpdatePanel ID="UpdatePanelUser" runat="server">
                                 <ContentTemplate>
                                     <asp:ListView ID="UserListView" runat="server" 
@@ -42,7 +43,7 @@
                                         OnItemDeleted="RefreshAll"
                                         OnItemInserted="RefreshAll">
                                     <EmptyDataTemplate>
-                                        <span>No Security users have been set up.</span>
+                                        <span>No users have been set up.</span>
                                     </EmptyDataTemplate>
                                     <LayoutTemplate>
                                         <div class="table-responsive">
@@ -106,10 +107,6 @@
                                                 </small>
                                             </td>
                                             <td class="align-top">
-                                                <asp:TextBox ID="UserEmail" runat="server"
-                                                    text='<%# BindItem.Email %>' TextMode="Email" 
-                                                    placeholder="User Email"
-                                                    CssClass="form-control" ></asp:TextBox>
                                             </td>
                                             <td class="align-top">
                                                 <asp:TextBox ID="EmployeeIDTextBox" runat="server"
@@ -138,17 +135,17 @@
                                         </tr>
                                     </InsertItemTemplate>
                                 </asp:ListView>
-                                <asp:ObjectDataSource ID="UserListViewODS" runat="server" 
-                                    DataObjectTypeName="BSMSData.Entities.Security.UserProfile" 
-                                    DeleteMethod="RemoveUser" 
-                                    InsertMethod="AddUser" 
-                                    SelectMethod="ListAllUsers"
-                                    OldValuesParameterFormatString="original_{0}"  
-                                    TypeName="BSMSSystem.BLL.Security.UserManager"
-                                     OnDeleted="CheckForException"
-                                     OnInserted="CheckForException"
-                                     OnSelected="CheckForException">
-                                </asp:ObjectDataSource>
+                                    <asp:ObjectDataSource ID="UserListViewODS" runat="server" 
+                                        DataObjectTypeName="BSMSData.Entities.Security.UserProfile" 
+                                        DeleteMethod="RemoveUser" 
+                                        InsertMethod="AddUser" 
+                                        SelectMethod="ListAllUsers"
+                                        OldValuesParameterFormatString="original_{0}"  
+                                        TypeName="BSMSSystem.BLL.Security.UserManager"
+                                        OnDeleted="CheckForException"
+                                        OnInserted="CheckForException"
+                                        OnSelected="CheckForException">
+                                    </asp:ObjectDataSource>
                                     <asp:ObjectDataSource ID="RoleNameODS" runat="server" 
                                     SelectMethod="ListAllRoleNames"
                                     OldValuesParameterFormatString="original_{0}"  
@@ -158,9 +155,10 @@
                             </asp:UpdatePanel>   
                         </div>
 
+                        <!--Manage Roles tab pane-->
                         <div class="tab-pane fade" id="role" role="tabpanel" aria-labelledby="role-tab">
                             <h5 class="card-title">Manage Roles</h5>
-                            <p class="card-text text-muted">Add or Remove Roles</p>
+                            <p class="card-text text-muted">Add or remove roles</p>
                             <asp:UpdatePanel ID="UpdatePanelrole" runat="server">
                                 <ContentTemplate>
                                    <asp:ListView ID="RoleListView" runat="server"

@@ -275,7 +275,7 @@ namespace BSMSSystem.BLL.Security
                         EmployeeID = userinfo.EmployeeId,
                         CustomerID = userinfo.CustomerId,
                         UserName = userinfo.UserName,
-                        Email = userinfo.Email
+                        Email = string.Format(STR_EMAIL_FORMAT, userinfo.UserName)
                     };
                     IdentityResult result = this.Create(userAccount,
                         string.IsNullOrEmpty(userinfo.RequestedPassword) ? STR_DEFAULT_PASSWORD
@@ -290,7 +290,6 @@ namespace BSMSSystem.BLL.Security
                     }
                     foreach (var roleName in userinfo.RoleMemberships)
                     {
-                        //this.AddToRole(userAccount.Id, roleName);
                         AddUserToRole(userAccount, roleName);
                     }
                 }
