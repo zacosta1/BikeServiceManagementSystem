@@ -75,16 +75,16 @@
                                                 <%# Item.FirstName + " " + Item.LastName %>
                                             </td>
                                             <td class="align-middle">
-                                                    <asp:Repeater ID="RoleUserRepeater" runat="server"
-                                                        DataSource="<%# Item.RoleMemberships%>"
-                                                        ItemType="System.String">
-                                                        <ItemTemplate>
-                                                                <%# Item %>
-                                                        </ItemTemplate>
-                                                        <SeparatorTemplate>
-                                                            <br />
-                                                        </SeparatorTemplate>
-                                                    </asp:Repeater>
+                                                <asp:Repeater ID="RoleUserRepeater" runat="server"
+                                                    DataSource="<%# Item.RoleMemberships%>"
+                                                    ItemType="System.String">
+                                                    <ItemTemplate>
+                                                            <%# Item %>
+                                                    </ItemTemplate>
+                                                    <SeparatorTemplate>
+                                                        <br />
+                                                    </SeparatorTemplate>
+                                                </asp:Repeater>
                                             </td>
                                             <td class="align-middle">
                                                 <asp:LinkButton ID="RemoveUser" runat="server" CommandName="Delete" Text="Remove"
@@ -119,8 +119,8 @@
                                                 </small>
                                             </td>
                                             <td class="align-top text-left">
-                                                <asp:CheckBoxList ID="RoleMemberships" runat="server"
-                                                    DataSourceID="RoleNameODS" CssClass="bg-transparent custom-control custom-checkbox" RepeatDirection="Vertical" RepeatLayout="Flow"></asp:CheckBoxList>
+                                                <asp:CheckBoxList ID="RoleMemberships" runat="server" DataSourceID="RoleNameODS" CssClass="bg-transparent custom-control custom-checkbox form-group form-check"
+                                                    RepeatDirection="Vertical" RepeatLayout="Flow"/>
                                             </td>
                                             <td class="align-top">
                                                 <asp:LinkButton ID="InsertUser" runat="server" CommandName="Insert" Text="Add User" ToolTip="Add User"

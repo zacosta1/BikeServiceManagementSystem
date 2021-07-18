@@ -92,7 +92,7 @@
                     (i.e. jdoe for John Doe). The Webmaster can login as webmaster.</p>
             </div>
         </div>
-        <div class="row mb-4">
+        <div class="row">
             <div class="col-12">
                 <h2>Password</h2>
                 <p class="text-muted">The default password for the users listed above is <strong>Pa$$word1</strong></p>

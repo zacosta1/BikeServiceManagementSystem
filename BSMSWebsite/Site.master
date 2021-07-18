@@ -22,8 +22,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 
 </head>
-<body class="d-flex flex-column h-100">
-    <form runat="server">
+<body class="h-100">
+    <form runat="server" class="d-flex flex-column h-100">
         <asp:ScriptManager runat="server">
             <Scripts>
                 <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
@@ -105,14 +105,13 @@
             </nav>
         </header>
         
-        <main role="main" class="container-fluid p-0">
+        <main role="main" class="flex-shrink-0">
             <asp:ContentPlaceHolder ID="MainContent" runat="server">
             </asp:ContentPlaceHolder>
-            <hr />
         </main>
         
-        <footer class="footer mt-auto py-3">
-            <div class="container">
+        <footer class="footer py-3">
+            <div class="container text-center">
                 <span class="text-muted">&copy; <%: DateTime.Now.Year %> Zenon Acosta</span>
             </div>
         </footer>
