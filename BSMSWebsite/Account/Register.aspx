@@ -2,16 +2,14 @@
 
 <asp:Content runat="server" ID="BodyContent" ContentPlaceHolderID="MainContent">
     <div class="text-center form-signin my-auto">
-        <h1 class="mt-5 display-4">Zen Bikez</h1>
-        <h2 class="h3 mb-3 font-weight-normal">Register</h2>
-        <p class="lead">Create an account</p>
+        <h1 class="mb-5">Create Account</h1>
         <p class="text-danger">
             <asp:Literal runat="server" ID="ErrorMessage" />
         </p>
 
         <div class="form-group">
-            <asp:Label runat="server" AssociatedControlID="UserName" CssClass="sr-only">User name</asp:Label>
-            <asp:TextBox runat="server" ID="UserName" CssClass="form-control" placeholder="User name" />
+            <asp:Label runat="server" AssociatedControlID="UserName" CssClass="sr-only">Username</asp:Label>
+            <asp:TextBox runat="server" ID="UserName" CssClass="form-control" placeholder="Username" />
             <small class="form-text">
                 <asp:RequiredFieldValidator runat="server" ControlToValidate="UserName"
                     CssClass="text-danger" ErrorMessage="A user name is required." 
@@ -29,7 +27,7 @@
         </div>
         <div class="form-group">
             <asp:Label runat="server" AssociatedControlID="ConfirmPassword" CssClass="sr-only">Confirm password</asp:Label>
-            <asp:TextBox runat="server" ID="ConfirmPassword" TextMode="Password" CssClass="form-control" placeholder="Confirm Password" />
+            <asp:TextBox runat="server" ID="ConfirmPassword" TextMode="Password" CssClass="form-control" placeholder="Confirm Password" ToolTip="Re-enter password to confirm." />
             <small class="form-text">
                 <asp:RequiredFieldValidator runat="server" ControlToValidate="ConfirmPassword"
                     CssClass="text-danger" Display="Dynamic" ErrorMessage="A password confirmation is required." SetFocusOnError="true" />
@@ -37,7 +35,7 @@
                     CssClass="text-danger" Display="Dynamic" ErrorMessage="The password and confirmation password do not match." SetFocusOnError="true"  />
             </small>
         </div>
-        <asp:Button runat="server" OnClick="CreateUser_Click" Text="Register" CssClass="btn btn-lg btn-primary btn-block" />
+        <asp:Button runat="server" OnClick="CreateUser_Click" Text="Register" CssClass="btn btn-lg btn-success btn-block" />
     </div>
     
     <style>

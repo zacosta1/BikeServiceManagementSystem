@@ -4,16 +4,15 @@
 
 <asp:Content runat="server" ID="BodyContent" ContentPlaceHolderID="MainContent">
     <div class="text-center form-signin my-auto">
-        <h1 class="mt-5 display-4">Zen Bikez</h1>
-        <h2 class="h3 mb-3 font-weight-normal">Log In</h2>
+        <h1 class="mb-5">Sign In</h1>
         <asp:PlaceHolder runat="server" ID="ErrorMessage" Visible="false">
             <p class="text-danger">
                 <asp:Literal runat="server" ID="FailureText" />
             </p>
         </asp:PlaceHolder>
         <div class="form-group">
-            <asp:Label runat="server" AssociatedControlID="UserName" CssClass="sr-only">User name</asp:Label>
-            <asp:TextBox runat="server" ID="UserName" CssClass="form-control" placeholder="User name" />
+            <asp:Label runat="server" AssociatedControlID="UserName" CssClass="sr-only">Username</asp:Label>
+            <asp:TextBox runat="server" ID="UserName" CssClass="form-control" placeholder="Username" />
             <small class="form-text">
                 <asp:RequiredFieldValidator runat="server" ControlToValidate="UserName" CssClass="text-danger" ErrorMessage="User name required."
                     Display="Dynamic" SetFocusOnError ="true"/>

@@ -38,12 +38,6 @@ public partial class Account_Manage : System.Web.UI.Page
             {
                 changePasswordHolder.Visible = true;
             }
-            else
-            {
-                setPassword.Visible = true;
-                changePasswordHolder.Visible = false;
-            }
-            CanRemoveExternalLogins = manager.GetLogins(User.Identity.GetUserId()).Count() > 1;
 
             // Render success message
             var message = Request.QueryString["m"];
@@ -73,24 +67,6 @@ public partial class Account_Manage : System.Web.UI.Page
                 var user = manager.FindById(User.Identity.GetUserId());
                 IdentityHelper.SignIn(manager, user, isPersistent: false);
                 Response.Redirect("~/Account/Manage?m=ChangePwdSuccess");
-            }
-            else
-            {
-                AddErrors(result);
-            }
-        }
-    }
-
-    protected void SetPassword_Click(object sender, EventArgs e)
-    {
-        if (IsValid)
-        {
-            // Create the local login info and link the local account to the user
-            UserManager manager = new UserManager();
-            IdentityResult result = manager.AddPassword(User.Identity.GetUserId(), password.Text);
-            if (result.Succeeded)
-            {
-                Response.Redirect("~/Account/Manage?m=SetPwdSuccess");
             }
             else
             {
