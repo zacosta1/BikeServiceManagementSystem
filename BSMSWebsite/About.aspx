@@ -36,7 +36,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title">Application Administrators</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">User(s) than can fully manage the application:</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">User(s) that have exclusive access to Security management, and can view all subsystems of the application:</h6>
                         <ul>
                             <li>Webmaster</li>
                         </ul>
@@ -47,7 +47,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title">Mechanics</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">User(s) that cannot access the Sales and Purchasing subsystems and Security management:</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">User(s) that cannot access the Sales and Purchasing subsystems, and Security management:</h6>
                         <ul>
                             <li>Nole Body</li>
                             <li>Willie Work</li>
@@ -63,7 +63,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title">Clerks</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">User(s) that cannot access Servicing and Sales subsystems and Security management:</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">User(s) that cannot access Servicing and Sales subsystems, and Security management:</h6>
                         <ul>
                             <li>Freda Flash</li>
                             <li>Sadie Star</li>
@@ -75,7 +75,7 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title">Sales</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">User(s) that cannot access Servicing and Purchasing subsystems and Security management:</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">User(s) that cannot access Servicing and Purchasing subsystems, and Security management:</h6>
                         <ul>
                             <li>Max Smart</li>
                             <li>Shelia Seller</li>
