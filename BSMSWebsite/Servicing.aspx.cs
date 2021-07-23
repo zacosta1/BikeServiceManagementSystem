@@ -31,6 +31,12 @@ public partial class Servicing : System.Web.UI.Page
                 {
                     Response.Redirect("~/Account/Login.aspx");
                 }
+                if (User.IsInRole(SecurityRoles.WebsiteAdmins))
+                {
+                    //default webmaster has no employee ID associated, hence an error occurs when adding a new service record.
+                    //hide Add New Service button to prevent new service records from being added by the webmaster
+                    AddNewServiceModalButtonPanel.Visible = false;
+                }
 
                 //display user's full name
                 //if (User.IsInRole(SecurityRoles.ServicingStaff))

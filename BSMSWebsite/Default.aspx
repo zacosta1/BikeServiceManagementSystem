@@ -16,7 +16,7 @@
                         <img src="https://via.placeholder.com/1040x320/7f7f7f/7f7f7f" class="card-img-top" alt="...">
                         <h2 class="card-title">In-Store Bike Servicing</h2>
                         <h3 class="card-subtitle mb-2 text-muted h5">We can make your bikes go zen!</h3>
-                        <p>Book now and visit our shop with your bike.</p>
+                        <p>Book now and bring your bike for servicing.</p>
 
                         <asp:HyperLink NavigateUrl="#" runat="server" CssClass="btn btn-lg btn-primary" Text="Book Now"/>
                     </div>
