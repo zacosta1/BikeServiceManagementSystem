@@ -13,7 +13,9 @@ The main scope of this project is a Servicing subsystem, which was my individual
 - Purchasing - supports inventory item purchases
 - Receiving and Returns - supports reception of products from suppliers
 - Sales - supports sales for online customers
- 
+
+The solution uses [Bootstrap](https://getbootstrap.com/) for quicker design and layout. Web design was not a focus in this project, though the application's design should at least simulate a real one's appearance.
+
 ## Security Implementation
 The original group project application setup file already included security components. Each team member only needed to adjust the supplied security components to support the required and appropriate security roles.
 
