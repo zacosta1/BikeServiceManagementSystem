@@ -1,4 +1,4 @@
-# BikeServiceManagementSystem
+# Bike Service Management System
 This project is a business solution that allows bike mechanics to manage bike servicing, developed to showcase my ASP.NET and C# development skills.
 
 The solution features CRUD (Create, Read, Update, and Delete) functions through:
