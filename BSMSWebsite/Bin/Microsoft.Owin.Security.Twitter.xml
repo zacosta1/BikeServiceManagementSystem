@@ -19,6 +19,26 @@
             Gets or sets the Twitter screen name
             </summary>
         </member>
+        <member name="T:Microsoft.Owin.Security.Twitter.Messages.RequestToken">
+            <summary>
+            Twitter request token
+            </summary>
+        </member>
+        <member name="P:Microsoft.Owin.Security.Twitter.Messages.RequestToken.Token">
+            <summary>
+            Gets or sets the Twitter token
+            </summary>
+        </member>
+        <member name="P:Microsoft.Owin.Security.Twitter.Messages.RequestToken.TokenSecret">
+            <summary>
+            Gets or sets the Twitter token secret
+            </summary>
+        </member>
+        <member name="P:Microsoft.Owin.Security.Twitter.Messages.RequestToken.Properties">
+            <summary>
+            Gets or sets a property bag for common authentication properties
+            </summary>
+        </member>
         <member name="T:Microsoft.Owin.Security.Twitter.Messages.RequestTokenSerializer">
             <summary>
             Serializes and deserializes Twitter request and access tokens so that they can be used by other application components.
@@ -51,26 +71,6 @@
             </summary>
             <param name="reader">The reader to use in reading the token bytes</param>
             <returns>The token</returns>
-        </member>
-        <member name="T:Microsoft.Owin.Security.Twitter.Messages.RequestToken">
-            <summary>
-            Twitter request token
-            </summary>
-        </member>
-        <member name="P:Microsoft.Owin.Security.Twitter.Messages.RequestToken.Token">
-            <summary>
-            Gets or sets the Twitter token
-            </summary>
-        </member>
-        <member name="P:Microsoft.Owin.Security.Twitter.Messages.RequestToken.TokenSecret">
-            <summary>
-            Gets or sets the Twitter token secret
-            </summary>
-        </member>
-        <member name="P:Microsoft.Owin.Security.Twitter.Messages.RequestToken.Properties">
-            <summary>
-            Gets or sets a property bag for common authentication properties
-            </summary>
         </member>
         <member name="T:Microsoft.Owin.Security.Twitter.Messages.Serializers">
             <summary>
