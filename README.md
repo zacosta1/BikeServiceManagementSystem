@@ -1,5 +1,5 @@
 # Bike Service Management System
-This project is a business solution that allows bike mechanics to manage bike servicing, developed to showcase my ASP.NET and C# development skills.
+This project is a business solution that allows bike mechanics to manage bike servicing, developed to refresh and showcase my ASP.NET and C# development skills.
 
 The solution features CRUD (Create, Read, Update, and Delete) functions through:
 - Creating a new service, service details, and service parts required by a service
@@ -14,7 +14,11 @@ The main scope of this project is a Servicing subsystem, which was my individual
 - Receiving and Returns - supports reception of products from suppliers
 - Sales - supports sales for online customers
 
+### Web Design
 The solution uses [Bootstrap](https://getbootstrap.com/) for quicker design and layout. Web design was not a focus in this project, though the application's design should at least simulate a real one's appearance.
+
+### Database
+A database backup was already included in the original group project setup file. Database programming was not the focus in this project, but the application has to connect and interact with the supplied database through a web connection string.
 
 ## Security Implementation
 The original group project application setup file already included security components. Each team member only needed to adjust the supplied security components to support the required and appropriate security roles.
